@@ -7,5 +7,6 @@ namespace API.Settings
 {
     public class Jwt
     {
+        public string Secret { get; set; }
     }
 }

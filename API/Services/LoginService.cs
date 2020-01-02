@@ -85,7 +85,7 @@ namespace API.Services
 
             //store session ID in a JWT token
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("EtienneJohanJoep");
+            var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
@@ -116,6 +116,7 @@ namespace API.Services
             //get the secret from the session manager
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.ReadJwtToken(finishData.jwt);
+            //TODO: validate JWT
             Guid sessionId = Guid.Parse((string)token.Payload[ClaimTypes.Sid]);
             if (!sessionManager.hasSession(sessionId))
                 return "Session not found";
