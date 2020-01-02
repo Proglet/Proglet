@@ -33,7 +33,8 @@ namespace Proglet.Core.Data
         public DateTime SubmissionTime { get; set; }
 
 
-
+        [NotMapped]
+        public byte[] SubmissionZip { get; set; }
 
 
 

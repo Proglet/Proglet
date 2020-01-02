@@ -42,14 +42,19 @@ namespace API.Controllers
             return user;
         }
 
-        // GET: api/Users/5
-        [HttpGet("email/{id}")]
-        public async Task<ActionResult<User>> GetUserByEMail(string id)
-        {
-            var user = _context.Users.Where(e => e.Email == id).FirstOrDefault();
 
-            if (user == null)
-            {
+        /// <summary>
+        /// Get User based on email address
+        /// </summary>
+        /// <param name="email">E-mail address</param>
+        /// <returns></returns>
+        // GET: api/Users/5
+        [HttpGet("email/{email}")]
+        public async Task<ActionResult<User>> GetUserByEMail(string email)
+        {
+            var user = await _context.Users.Where(e => e.Email == email).FirstAsync();
+
+            if (user == null) {
                 return NotFound();
             }
 
@@ -62,25 +67,18 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(string id, User user)
         {
-            if (id != user.Username)
-            {
+            if (id != user.Username) {
                 return BadRequest();
             }
 
             _context.Entry(user).State = EntityState.Modified;
 
-            try
-            {
+            try {
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
+            } catch (DbUpdateConcurrencyException) {
+                if (!UserExists(id)) {
                     return NotFound();
-                }
-                else
-                {
+                } else {
                     throw;
                 }
             }
@@ -120,8 +118,7 @@ namespace API.Controllers
         public async Task<ActionResult<User>> DeleteUser(string id)
         {
             var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
+            if (user == null) {
                 return NotFound();
             }
 
@@ -129,6 +126,15 @@ namespace API.Controllers
             await _context.SaveChangesAsync();
 
             return user;
+        }
+
+
+        [HttpPost("basic_info_by_username")]
+        public async Task<ActionResult<IEnumerable<User>>> GetBasicInfoByUsername()
+        {
+
+
+            return null;
         }
 
         private bool UserExists(string id)
