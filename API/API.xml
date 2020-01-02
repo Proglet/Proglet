@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>API</name>
+    </assembly>
+    <members>
+        <member name="M:API.Controllers.LoginController.GetLoginMethods">
+            <summary>
+            Lists all available authentication systems
+            </summary>
+            <remarks>
+            
+            </remarks>
+        </member>
+        <member name="M:API.Controllers.LoginController.Login(System.Text.Json.JsonElement)">
+            <summary>
+            Logs in, using the specified login service
+            </summary>
+            <remarks>
+                POST login/login
+                {
+                    "loginservice" : "avans"
+                }
+            </remarks>
+        </member>
+        <member name="M:API.Controllers.LoginController.OAuth(System.String,System.String)">
+            <summary>
+            The return entry point for OAuth requests
+            </summary>
+            <param name="oauth_token"></param>
+            <param name="oauth_verifier"></param>
+            <returns></returns>
+        </member>
+        <member name="T:API.Controllers.LoginController.OauthFinishData">
+            <summary>
+            Finish up an OAuth login
+            </summary>
+        </member>
+        <member name="M:API.Controllers.UsersController.GetUserByEMail(System.String)">
+            <summary>
+            Get User based on email address
+            </summary>
+            <param name="email">E-mail address</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

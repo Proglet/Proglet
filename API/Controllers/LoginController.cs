@@ -24,7 +24,12 @@ namespace API.Controllers
         }
 
 
-        // GET: api/Login
+        /// <summary>
+        /// Lists all available authentication systems
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
         [HttpGet]
         public IActionResult GetLoginMethods()
         {
@@ -32,8 +37,14 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// POST: api/login/login
+        /// Logs in, using the specified login service
         /// </summary>
+        /// <remarks>
+        ///     POST login/login
+        ///     {
+        ///         "loginservice" : "avans"
+        ///     }
+        /// </remarks>
         [HttpPost("login")]
         public IActionResult Login([FromBody]JsonElement body)
         {
@@ -41,6 +52,12 @@ namespace API.Controllers
             return Ok(loginService.HandleLogin(loginservice, body, Request));//TODO: not everything is ok
         }
 
+        /// <summary>
+        /// The return entry point for OAuth requests
+        /// </summary>
+        /// <param name="oauth_token"></param>
+        /// <param name="oauth_verifier"></param>
+        /// <returns></returns>
         [HttpGet("oauth")]
         public IActionResult OAuth(string oauth_token, string oauth_verifier)
         {
@@ -51,18 +68,20 @@ namespace API.Controllers
             });
         }
 
-
-
+        /// <summary>
+        /// Finish up an OAuth login
+        /// </summary>
         public class OauthFinishData
         {
             public string oauth_token { get; set; }
             public string oauth_verifier { get; set; }
             public string jwt { get; set; }
         }
+
+
         [HttpPost("oauthfinish")]
         public IActionResult OAuthFinish([FromBody]OauthFinishData finishData)
         {
-
             return Ok("Ok");
         }
 
