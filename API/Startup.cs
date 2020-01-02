@@ -46,9 +46,9 @@ namespace API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
                 c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "API.xml"));
             });
-
             services.Configure<Settings.Jwt>(Configuration.GetSection("jwt"));
             services.Configure<Settings.Login>(Configuration.GetSection("login"));
+            services.AddSingleton<LoginOauthSessionService>();
             services.AddScoped<ILoginService, LoginService>();
         }
 

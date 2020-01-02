@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -68,21 +69,27 @@ namespace API.Controllers
             });
         }
 
-        /// <summary>
-        /// Finish up an OAuth login
-        /// </summary>
+
         public class OauthFinishData
         {
+            [Required]
             public string oauth_token { get; set; }
+            [Required]
             public string oauth_verifier { get; set; }
+            [Required]
             public string jwt { get; set; }
+            [Required]
+            public string loginservice { get; set; }
         }
 
 
+        /// <summary>
+        /// Finish up an OAuth login
+        /// </summary>
         [HttpPost("oauthfinish")]
         public IActionResult OAuthFinish([FromBody]OauthFinishData finishData)
         {
-            return Ok("Ok");
+            return Ok(loginService.FinishOAuth(finishData));
         }
 
 

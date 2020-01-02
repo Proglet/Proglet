@@ -31,7 +31,7 @@
             <param name="oauth_verifier"></param>
             <returns></returns>
         </member>
-        <member name="T:API.Controllers.LoginController.OauthFinishData">
+        <member name="M:API.Controllers.LoginController.OAuthFinish(API.Controllers.LoginController.OauthFinishData)">
             <summary>
             Finish up an OAuth login
             </summary>
