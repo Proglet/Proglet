@@ -85,7 +85,6 @@ namespace API.Services
 
             //store session ID in a JWT token
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
@@ -93,7 +92,7 @@ namespace API.Services
                     new Claim(ClaimTypes.Sid, sessionid.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(10),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.SecretPreLogin)), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
@@ -115,8 +114,10 @@ namespace API.Services
 
             //get the secret from the session manager
             var tokenHandler = new JwtSecurityTokenHandler();
+            ValidateToken(finishData.jwt, jwtSettings.SecretPreLogin);
+
             var token = tokenHandler.ReadJwtToken(finishData.jwt);
-            //TODO: validate JWT
+
             Guid sessionId = Guid.Parse((string)token.Payload[ClaimTypes.Sid]);
             if (!sessionManager.hasSession(sessionId))
                 return "Session not found";
@@ -151,11 +152,59 @@ namespace API.Services
             url = client.RequestUrl + "?" + client.GetAuthorizationQuery();
             request = (HttpWebRequest)WebRequest.Create(url);
             response = (HttpWebResponse)request.GetResponse();
-            querystring = new StreamReader(response.GetResponseStream()).ReadToEnd();
+            string info = new StreamReader(response.GetResponseStream()).ReadToEnd();
+            JsonElement infoJson = JsonSerializer.Deserialize<JsonElement>(info);
+            string loginName = infoJson[0].GetProperty("login").GetString();
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, loginName),
+                    new Claim(ClaimTypes.Email, "test@test.com"),
+                }),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secret)), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var newToken = tokenHandler.CreateToken(tokenDescriptor);
+
+            return new
+            {
+                jwt = tokenHandler.WriteToken(newToken)
+            };
+        }
 
 
 
-            return querystring;
+
+        private static JwtSecurityToken ValidateToken(string jwt, string key)
+        {
+            var validationParameters = new TokenValidationParameters
+            {
+                // Clock skew compensates for server time drift.
+                // We recommend 5 minutes or less:
+                ClockSkew = TimeSpan.FromMinutes(5),
+                // Specify the key used to sign the token:
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key)),
+                RequireSignedTokens = true,
+                // Ensure the token hasn't expired:
+                RequireExpirationTime = true,
+                ValidateLifetime = true,
+                ValidateAudience = false, //TODO: change to true
+                ValidateIssuer = false, //TODO: change to true
+            };
+
+            try {
+                var claimsPrincipal = new JwtSecurityTokenHandler()
+                    .ValidateToken(jwt, validationParameters, out var rawValidatedToken);
+                return (JwtSecurityToken)rawValidatedToken;
+            }
+            catch (SecurityTokenValidationException stvex) {
+                throw new Exception($"Token failed validation: {stvex.Message}");
+            }
+            catch (ArgumentException argex) {
+                throw new Exception($"Token was invalid: {argex.Message}");
+            }
         }
     }
 }

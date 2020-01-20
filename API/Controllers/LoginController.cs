@@ -6,10 +6,10 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using API.Services;
 using API.Settings;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
 
 namespace API.Controllers
 {
@@ -92,6 +92,17 @@ namespace API.Controllers
             return Ok(loginService.FinishOAuth(finishData));
         }
 
+
+        /// <summary>
+        /// test API to see if the user is logged in properly
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("testlogin")]
+        public IActionResult TestLogin()
+        {
+            return Ok("Logged in!");
+        }
 
 
     }

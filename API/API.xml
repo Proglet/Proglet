@@ -36,6 +36,12 @@
             Finish up an OAuth login
             </summary>
         </member>
+        <member name="M:API.Controllers.LoginController.TestLogin">
+            <summary>
+            test API to see if the user is logged in properly
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:API.Controllers.UsersController.GetUserByEMail(System.String)">
             <summary>
             Get User based on email address
