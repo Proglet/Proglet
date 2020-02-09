@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CoreDataORM;
 using Proglet.Core.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CoursesController : ControllerBase
@@ -23,9 +25,21 @@ namespace API.Controllers
 
         // GET: api/Courses
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Course>>> GetCourses()
+        public async Task<ActionResult<IEnumerable<Object>>> GetCourses()
         {
-            return await _context.Courses.ToListAsync();
+            int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value);
+
+            return await _context.Courses
+                .Include(e => e.CourseTemplate)
+                //.Where(e => e.Enabled && e.HidderAfter.Value > DateTime.Now)
+                .Select(e => new 
+                { 
+                    id = e.CourseId, 
+                    Name = e.CourseTemplate.Name,
+                    Title = e.CourseTemplate.Title,
+                    Description = e.CourseTemplate.Description,
+                    Registered = e.Users.Any(u => u.UserId == userId && u.Active)
+                }).ToListAsync();
         }
 
         // GET: api/Courses/5

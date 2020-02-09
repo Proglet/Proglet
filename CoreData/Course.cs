@@ -17,8 +17,11 @@ namespace Proglet.Core.Data
         public bool Enabled { get; set; }
 
         public CourseTemplate CourseTemplate { get; set; }
+        [Column(TypeName = "varchar(64)")]
+        public string Curriculum { get; set; }
 
-        public DateTime? HidderAfter { get; set; }
+        [Column(TypeName = "DATE")]
+        public DateTime HidderAfter { get; set; }
 
         public ICollection<CourseRegistration> Users { get; set; }
     }

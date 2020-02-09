@@ -60,6 +60,7 @@ namespace Proglet.Core.Data
         [Column(TypeName = "varchar(64)")]
         public string Email { get; set; }
         
+        [Column(TypeName = "varchar(64)")]
         public string OrganizationIdentifier { get; set; }
 
         public UserRoles UserRole { get; set; }
