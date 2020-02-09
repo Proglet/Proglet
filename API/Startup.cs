@@ -27,6 +27,11 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<Settings.Jwt>(Configuration.GetSection("jwt"));
+            services.Configure<Settings.Login>(Configuration.GetSection("login"));
+            services.Configure<Config>(Configuration.GetSection("database"));
+
+
             services.AddDbContext<DataContext>();
             services.AddControllers();
 
@@ -36,8 +41,6 @@ namespace API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
                 c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "API.xml"));
             });
-            services.Configure<Settings.Jwt>(Configuration.GetSection("jwt"));
-            services.Configure<Settings.Login>(Configuration.GetSection("login"));
             services.AddSingleton<LoginOauthSessionService>();
             services.AddScoped<ILoginService, LoginService>();
 
@@ -66,9 +69,16 @@ namespace API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            using (var context = scope.ServiceProvider.GetService<DataContext>())
+            {
+                //context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+            }
 
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
+
+                // Enable middleware to serve generated Swagger as a JSON endpoint.
+                app.UseSwagger();
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
             // specifying the Swagger JSON endpoint.

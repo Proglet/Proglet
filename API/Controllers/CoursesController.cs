@@ -44,21 +44,21 @@ namespace API.Controllers
 
 
         // GET: api/Courses/CourseByUser
-        [HttpGet("/CourseByUser/{username}")]
-        public async Task<ActionResult<IEnumerable<Course>>> GetCourseByUser(string username)
-        {
-            //var course = await _context.Courses.FindAsync(id);
+        //[HttpGet("/CourseByUser/{username}")]
+        //public async Task<ActionResult<IEnumerable<Course>>> GetCourseByUser(string username)
+        //{
+        //    //var course = await _context.Courses.FindAsync(id);
 
 
-            var courses = await _context.Courses.Where(c => c.CreatedBy.Username == username).ToListAsync();
+        //    var courses = await _context.Courses.Where(c => c.CreatedBy.Username == username).ToListAsync();
 
-            if (courses == null)
-            {
-                return NotFound();
-            }
+        //    if (courses == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return courses;
-        }
+        //    return courses;
+        //}
 
         // PUT: api/Courses/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for

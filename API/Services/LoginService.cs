@@ -1,10 +1,13 @@
 ﻿using API.Controllers;
 using API.Settings;
+using CoreDataORM;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OAuth;
+using Proglet.Core.Data;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -35,10 +38,13 @@ namespace API.Services
     {
         private Settings.Login loginSettings;
         private Settings.Jwt jwtSettings;
+        private DataContext dataContext;
         private LoginOauthSessionService sessionManager;
+        private OAuthRequest validatedClient;
 
-        public LoginService(IOptions<Login> loginSettings, IOptions<Jwt> jwtSettings, LoginOauthSessionService sessionManager)
+        public LoginService(IOptions<Login> loginSettings, IOptions<Jwt> jwtSettings, LoginOauthSessionService sessionManager, DataContext dataContext)
         {
+            this.dataContext = dataContext;
             this.sessionManager = sessionManager;
             this.loginSettings = loginSettings.Value;
             this.jwtSettings = jwtSettings.Value;
@@ -126,7 +132,7 @@ namespace API.Services
 
 
             //confirm authenticity
-            OAuthRequest client = OAuthRequest.ForRequestToken(login.OAuth.ConsumerKey, login.OAuth.ConsumerSecret);
+            var client = OAuthRequest.ForRequestToken(login.OAuth.ConsumerKey, login.OAuth.ConsumerSecret);
             client.RequestUrl = login.OAuth.TokenUrl;
             client.Token = finishData.oauth_token;
             client.TokenSecret = token_secret;
@@ -143,25 +149,28 @@ namespace API.Services
 
 
             //make a request for information
-            client = OAuthRequest.ForRequestToken(login.OAuth.ConsumerKey, login.OAuth.ConsumerSecret);
-            client.RequestUrl = login.OAuth.InfoUrl;
-            client.Token = oauth_token;
-            client.TokenSecret = oauth_token_secret;
+            this.validatedClient = OAuthRequest.ForRequestToken(login.OAuth.ConsumerKey, login.OAuth.ConsumerSecret);
+            this.validatedClient.RequestUrl = login.OAuth.InfoUrl;
+            this.validatedClient.Token = oauth_token;
+            this.validatedClient.TokenSecret = oauth_token_secret;
 
             //make request
-            url = client.RequestUrl + "?" + client.GetAuthorizationQuery();
+            url = this.validatedClient.RequestUrl + "?" + this.validatedClient.GetAuthorizationQuery();
             request = (HttpWebRequest)WebRequest.Create(url);
             response = (HttpWebResponse)request.GetResponse();
             string info = new StreamReader(response.GetResponseStream()).ReadToEnd();
             JsonElement infoJson = JsonSerializer.Deserialize<JsonElement>(info);
             string loginName = infoJson[0].GetProperty("login").GetString();
+            int id = int.Parse(infoJson[0].GetProperty("Id").GetString());
+
+            var user = CheckOauthLogin(finishData.loginservice, id);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, loginName),
-                    new Claim(ClaimTypes.Email, "test@test.com"),
+                    new Claim(ClaimTypes.NameIdentifier, user.Username),
+                    new Claim("client_id", user.UserId+"")
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secret)), SecurityAlgorithms.HmacSha256Signature)
@@ -174,8 +183,50 @@ namespace API.Services
             };
         }
 
+        private User CheckOauthLogin(string loginservice, int id)
+        {
+            var oauthLogin = dataContext.OauthLogins.Where(l => l.LoginService == loginservice && l.OauthLoginId == id).Include(l => l.User).FirstOrDefault();
+            if(oauthLogin == null) // no user made yet
+            {
+                validatedClient.RequestUrl = loginSettings[loginservice].OAuth.MoreInfoUrl;
+                
+                var url = validatedClient.RequestUrl + "?" + validatedClient.GetAuthorizationQuery();
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                var response = (HttpWebResponse)request.GetResponse();
+                string info = new StreamReader(response.GetResponseStream()).ReadToEnd();
+                JsonElement infoJson = JsonSerializer.Deserialize<JsonElement>(info);
+
+                string fullName = infoJson.GetProperty("name").GetProperty("formatted").GetString();
+                string email = infoJson.GetProperty("emails")[0].GetString();
+                bool isTeacher = infoJson.GetProperty("employee").GetString() == "true";
+                bool isStudent = infoJson.GetProperty("student").GetString() == "true";
+
+                User user = new User()
+                {
+                    Username = fullName,
+                    Email = email,
+                    OrganizationIdentifier = isTeacher ? "teacher" : "",
+                    UserRole = isTeacher ? UserRoles.Teacher : UserRoles.Student,
+                    RegistrationDate = DateTime.Now
+                };
+                dataContext.Users.Add(user);
+                dataContext.SaveChanges();
 
 
+                oauthLogin = new OauthLogin()
+                {
+                    OauthLoginId = id,
+                    LoginService = loginservice,
+                    User = user
+                };
+
+                dataContext.OauthLogins.Add(oauthLogin);
+                dataContext.SaveChanges();
+                user.OauthLogin = oauthLogin;
+                dataContext.SaveChanges();
+            }
+            return oauthLogin.User;
+        }
 
         private static JwtSecurityToken ValidateToken(string jwt, string key)
         {

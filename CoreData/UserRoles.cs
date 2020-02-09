@@ -6,8 +6,7 @@ namespace Proglet.Core.Data
 {
     public enum UserRoles
     {
-        User,
-        StudentAssistant,
+        Student,
         Teacher,
         Administrator
     }

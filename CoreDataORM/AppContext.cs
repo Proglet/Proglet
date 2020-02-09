@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.Debug;
+using Microsoft.Extensions.Options;
 using Proglet.Core.Data;
 using Proglet.Core.Data.Internal;
 using System;
@@ -14,12 +15,15 @@ namespace CoreDataORM
 {
     public class DataContext : DbContext
     {
+        private Config config;
+
         /*public DataContext(DbContextOptions<AppContext> options)
-            : base(options)
-        { }*/
+: base(options)
+{ }*/
 
         public DbSet<User> Users { get; set; }
         public DbSet<Course> Courses { get; set; }
+        public DbSet<CourseRegistration> CourseRegistrations { get; set; }
 
         public DbSet<Exercise> Exercises { get; set; }
 
@@ -28,9 +32,11 @@ namespace CoreDataORM
         public DbSet<Submission> Submissions { get; set; }
 
         public DbSet<Point> Points { get; set; }
+        public DbSet<OauthLogin> OauthLogins { get; set; }
 
-        public DataContext()
+        public DataContext(IOptions<Config> config)
         {
+            this.config = config.Value;
         }
 
         private ILoggerFactory GetLoggerFactory()
@@ -46,7 +52,7 @@ namespace CoreDataORM
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySql("server=localhost;database=Proglet;user=Proglet;password=Welkom01");
+            optionsBuilder.UseMySql(config.configstring);
             optionsBuilder.UseLoggerFactory(GetLoggerFactory());
            
         }
@@ -55,29 +61,33 @@ namespace CoreDataORM
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<User>(entity =>
+            modelBuilder.Entity<User>(user =>
             {
-                entity.HasKey(e => e.Username);
-                entity.Property(e => e.Email).IsRequired();
-                entity.Property(e => e.UserRole).HasDefaultValue(UserRoles.User);
-                entity.Property(e => e.RegistrationDate).HasDefaultValueSql("NOW()");
+                user.Property(u => u.UserRole).HasDefaultValue(UserRoles.Student);
+                //                entity.Property(e => e.RegistrationDate).HasDefaultValueSql("NOW()");
+                user.HasOne(u => u.OauthLogin).WithOne(o => o.User);
             });
 
             modelBuilder.Entity<Course>(entity =>
             {
                 entity.HasKey(e => e.CourseId);
-                entity.Property(e => e.Name).IsRequired();
                 entity.HasOne(e => e.CourseTemplate);
-                entity.Property(c => c.CreatedOn).HasDefaultValueSql("NOW()");
-                entity.HasOne(c => c.CreatedBy).WithMany(u => u.CreatedCourses);
             });
 
-            modelBuilder.Entity<CourseTemplate>(entitiy =>
+            modelBuilder.Entity<CourseRegistration>(reg =>
             {
-                entitiy.HasKey(e => e.CourseTemplateId);
-                entitiy.Property(e => e.GitUrl).IsRequired();
-                entitiy.HasOne(e => e.CreatedBy);
-                entitiy.Property(e => e.CreatedOn).HasDefaultValueSql("NOW()");
+                reg.HasKey(r => new { r.UserId, r.CourseId });
+                reg.HasOne(r => r.Course).WithMany(c => c.Users);
+                reg.HasOne(r => r.User).WithMany(u => u.CourseRegistrations);
+            });
+
+            modelBuilder.Entity<CourseTemplate>(entity =>
+            {
+                entity.HasKey(e => e.CourseTemplateId);
+                entity.Property(e => e.GitUrl).IsRequired();
+                entity.Property(e => e.Name).IsRequired();
+                entity.HasOne(e => e.CreatedBy);
+                //entity.Property(e => e.CreatedOn).HasDefaultValueSql("NOW()");
             });
 
             modelBuilder.Entity<Exercise>(entity =>
@@ -90,10 +100,18 @@ namespace CoreDataORM
             modelBuilder.Entity<Submission>(entity =>
             {
                 entity.HasKey(e => e.SubmissionId);
-                entity.Property(e => e.SubmissionTime).HasDefaultValueSql("NOW()");
+                //entity.Property(e => e.SubmissionTime).HasDefaultValueSql("NOW()");
                 entity.HasOne(e => e.User).WithMany(e => e.Submissions);
                 entity.HasOne(e => e.Exercise);
             });
+
+            modelBuilder.Entity<OauthLogin>(entity =>
+            {
+                entity.HasIndex(e => new { e.Id, e.LoginService });
+                entity.Property(e => e.LoginService).HasColumnType("varchar(64)");
+                entity.HasOne(e => e.User).WithOne(e => e.OauthLogin);
+            });
+
         }
     }
 }

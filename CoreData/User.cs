@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
 
 namespace Proglet.Core.Data
@@ -49,9 +51,13 @@ namespace Proglet.Core.Data
             set => SetField(ref email, value);
         }*/
 
+        [Key]
+        public int UserId { get; set; }
 
+        [Column(TypeName = "varchar(64)")]
         public string Username { get; set; }
 
+        [Column(TypeName = "varchar(64)")]
         public string Email { get; set; }
         
         public string OrganizationIdentifier { get; set; }
@@ -61,10 +67,10 @@ namespace Proglet.Core.Data
         public DateTime RegistrationDate { get; set; }
 
         public ICollection<Submission> Submissions { get; set; }
+        
+        public ICollection<CourseRegistration> CourseRegistrations { get; set; }
 
-        public ICollection<Course> CreatedCourses { get; set; }
-
-
+        public OauthLogin OauthLogin { get; set; }
 
         public override string ToString()
         {

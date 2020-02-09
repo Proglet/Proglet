@@ -22,6 +22,8 @@ namespace API.Settings
         public string LoginUrl { get; set; }
         public string TokenUrl { get; set; }
         public string InfoUrl { get; set; }
+        public string MoreInfoUrl { get; set; }
+
         public string ConsumerKey { get; set; }
         public string ConsumerSecret { get; set; }
 
