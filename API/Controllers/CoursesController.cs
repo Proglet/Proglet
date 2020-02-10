@@ -26,12 +26,12 @@ namespace API.Controllers
         // GET: api/Courses
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Object>>> GetCourses()
-        {
+        { 
             int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value);
 
             return await _context.Courses
                 .Include(e => e.CourseTemplate)
-                //.Where(e => e.Enabled && e.HidderAfter.Value > DateTime.Now)
+                .Where(e => e.Enabled && e.HidderAfter > DateTime.Now)
                 .Select(e => new 
                 { 
                     id = e.CourseId, 

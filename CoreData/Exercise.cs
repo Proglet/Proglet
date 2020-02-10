@@ -15,7 +15,11 @@ namespace Proglet.Core.Data
 
         public Course Course { get; set; }
 
+        [Column(TypeName = "VARCHAR(64)")]
         public string Name { get; set; }
+        
+        [Column(TypeName = "VARCHAR(64)")]
+        public string Subject { get; set; }
 
         public DateTime CreatedAt { get; set; }
 

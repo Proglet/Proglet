@@ -66,6 +66,7 @@ namespace CoreDataORM
                 user.Property(u => u.UserRole).HasDefaultValue(UserRoles.Student);
                 //                entity.Property(e => e.RegistrationDate).HasDefaultValueSql("NOW()");
                 user.HasOne(u => u.OauthLogin).WithOne(o => o.User);
+                user.HasMany(u => u.CourseRegistrations).WithOne(r => r.User);
             });
 
             modelBuilder.Entity<Course>(entity =>

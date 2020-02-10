@@ -60,12 +60,19 @@ package "" as CoursePackage {
   note bottom: TODO
 
   CourseTemplate "1" -- "0...*" Course
-  Course "0...*" --- "0...*" User : CourseRegistration
 
   Exercise "1" -- "1...*" Point
   Exercise "1...*" -- "1" Course
 }
 note top of CoursePackage : These tables change when a courses get updated
+
+entity CourseRegistration {
+  * enabled : boolean
+  * RegistrationDate
+}
+CourseRegistration "1" -- "0...*" Course
+CourseRegistration "1" -- "0...*" User
+
 
 package "" as SubmissionPackage {
   entity Submission {

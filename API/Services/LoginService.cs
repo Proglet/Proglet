@@ -160,8 +160,8 @@ namespace API.Services
             response = (HttpWebResponse)request.GetResponse();
             string info = new StreamReader(response.GetResponseStream()).ReadToEnd();
             JsonElement infoJson = JsonSerializer.Deserialize<JsonElement>(info);
-            string loginName = infoJson[0].GetProperty("login").GetString();
-            int id = int.Parse(infoJson[0].GetProperty("Id").GetString());
+            string loginName = infoJson[0].GetProperty("inlognaam").GetString();
+            int id = int.Parse(infoJson[0].GetProperty("studentnummer").GetString());
 
             var user = CheckOauthLogin(finishData.loginservice, id);
 
@@ -189,11 +189,12 @@ namespace API.Services
             if(oauthLogin == null) // no user made yet
             {
                 validatedClient.RequestUrl = loginSettings[loginservice].OAuth.MoreInfoUrl;
-                
+
                 var url = validatedClient.RequestUrl + "?" + validatedClient.GetAuthorizationQuery();
                 var request = (HttpWebRequest)WebRequest.Create(url);
                 var response = (HttpWebResponse)request.GetResponse();
                 string info = new StreamReader(response.GetResponseStream()).ReadToEnd();
+                Console.WriteLine(info);
                 JsonElement infoJson = JsonSerializer.Deserialize<JsonElement>(info);
 
                 string fullName = infoJson.GetProperty("name").GetProperty("formatted").GetString();
@@ -205,7 +206,7 @@ namespace API.Services
                 {
                     Username = fullName,
                     Email = email,
-                    OrganizationIdentifier = isTeacher ? "teacher" : "",
+                    OrganizationIdentifier = id+"",
                     UserRole = isTeacher ? UserRoles.Teacher : UserRoles.Student,
                     RegistrationDate = DateTime.Now
                 };
