@@ -27,7 +27,9 @@ namespace DockerSlaveManager
         {
             services.Configure<Config>(Configuration.GetSection("Docker"));
             services.AddControllers();
-            services.AddHostedService<DockerService>();
+            services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+            services.AddSingleton<IHostedService, DockerService>();
+            services.AddSingleton<DockerService>(sp => sp.GetServices<IHostedService>().ToList().Find(x => x.GetType() == typeof(DockerService)) as DockerService);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
