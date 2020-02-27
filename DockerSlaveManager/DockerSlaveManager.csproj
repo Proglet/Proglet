@@ -4,10 +4,12 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <StartupObject>DockerSlaveManager.Program</StartupObject>
     <UserSecretsId>c9ed3379-9799-4995-a8ca-e1816f0fca75</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Docker.DotNet" Version="3.125.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.10" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1" />
   </ItemGroup>
 
