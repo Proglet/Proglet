@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CoreDataORM;
 using Proglet.Core.Data.Internal;
+using API.Services;
 
 namespace API.Controllers
 {
@@ -15,10 +16,12 @@ namespace API.Controllers
     public class CourseTemplatesController : ControllerBase
     {
         private readonly DataContext _context;
+        private readonly IDockerService dockerService;
 
-        public CourseTemplatesController(DataContext context)
+        public CourseTemplatesController(DataContext context, IDockerService dockerService)
         {
             _context = context;
+            this.dockerService = dockerService;
         }
 
         // GET: api/CourseTemplates
@@ -105,6 +108,19 @@ namespace API.Controllers
         private bool CourseTemplateExists(long id)
         {
             return _context.CourseTemplates.Any(e => e.CourseTemplateId == id);
+        }
+
+
+        [HttpPost("refresh/{id}")]
+        public ActionResult Refresh(int id)
+        {
+            CourseTemplate template = _context.CourseTemplates.Where(t => t.CourseTemplateId == id).First();
+            dockerService.RunContainer(template.DockerRefreshImage, null, data =>
+            {
+                Console.WriteLine("GOT A REPLY");
+                Console.WriteLine(data);
+            });
+            return Ok("Ok");
         }
     }
 }

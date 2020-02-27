@@ -22,7 +22,9 @@ namespace Proglet.Core.Data.Internal
 
         [Column(TypeName = "varchar(255)")]
         public string GitUrl { get; set; }
-        //TODO: gitauth
+
+        [Column(TypeName = "varchar(255)")]
+        public string DockerRefreshImage { get; set; }
 
         public DateTime CreatedOn { get; set; }
 

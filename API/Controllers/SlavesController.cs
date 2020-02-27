@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using API.Services;
 using CoreDataORM;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +17,12 @@ namespace API.Controllers
     public class SlavesController : ControllerBase
     {
         private readonly DataContext _context;
+        private IDockerService dockerService;
 
-        public SlavesController(DataContext context)
+        public SlavesController(DataContext context, IDockerService dockerService)
         {
             _context = context;
+            this.dockerService = dockerService;
         }
 
         public class RegisterData
@@ -44,9 +49,22 @@ namespace API.Controllers
 
 
             if (slaveManager.Enabled)
+            {
+                dockerService.RegisterSlaveManager(slaveManager.Url);
                 return Ok("ok");
+            }
             else
                 return Problem("Not allowed");
+        }
+
+        [HttpPost("callback")]
+        public async Task<IActionResult> Callback(string id)
+        {
+            MemoryStream ms = new MemoryStream();
+            await Request.Body.CopyToAsync(ms);
+
+            dockerService.Callback(id, ms.ToArray());
+            return Ok("ok");
         }
 
 
