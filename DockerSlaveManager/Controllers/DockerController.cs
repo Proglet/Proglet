@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DockerSlaveManager.Models.Multipart;
 using DockerSlaveManager.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,19 +20,22 @@ namespace DockerSlaveManager.Controllers
             this.dockerService = dockerService;
         }
 
-        [HttpGet("test")]
-        public IActionResult test()
+        [HttpPost("run")]
+        public IActionResult Run([FromForm] RunConfig runConfig)
         {
-            var id = dockerService.RunContainerBackground("proglet/projectparser-intellij-edutools");
+            if (!runConfig.Image.StartsWith("proglet/"))
+                return Problem("Image not allowed");
+            var id = dockerService.RunContainerBackground(runConfig);
             return Ok(id);
         }
 
-        [HttpGet("status")]
-        public IActionResult status(string id)
+        [HttpGet("queue")]
+        public IActionResult Queue()
         {
-            var status = dockerService.GetRunStatus(id);
-            return Ok(status);
+            return Ok(dockerService.Queue());
         }
+
+     
 
     }
 }
