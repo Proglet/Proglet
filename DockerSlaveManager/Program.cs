@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -11,16 +12,25 @@ namespace DockerSlaveManager
 {
     public class Program
     {
-        public static void Main(string[] args)
+        private static CancellationTokenSource cancelTokenSource = new System.Threading.CancellationTokenSource();
+
+        public static async Task Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            await CreateHostBuilder(args).Build().RunAsync(cancelTokenSource.Token);
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                webBuilder.UseStartup<Startup>();
                 });
+        }
+
+        public static void Shutdown()
+        {
+            cancelTokenSource.Cancel();
+        }
     }
 }

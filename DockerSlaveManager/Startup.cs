@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using DockerSlaveManager.Services;
 using Microsoft.AspNetCore.Builder;
@@ -33,7 +35,7 @@ namespace DockerSlaveManager
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public async void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -46,6 +48,28 @@ namespace DockerSlaveManager
             {
                 endpoints.MapControllers();
             });
+
+            //register self at API host
+            string ApiUrl = Configuration.GetValue<string>("ApiUrl");
+            string MyUrl = Configuration.GetValue<string>("MyUrl");
+            string Auth = Configuration.GetValue<string>("Auth");
+
+            var client = new HttpClient();
+            string parameters = JsonSerializer.Serialize(new
+            {
+                Url = MyUrl,
+                Auth = Auth,
+            });
+            var response = await client.PostAsync(ApiUrl + "/api/slaves/register", new StringContent(parameters, System.Text.Encoding.UTF8, "application/json"));
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Could not connect to API, closing");
+                Program.Shutdown();
+            }
+            else
+            {
+                Console.WriteLine("Registered and confirmed at API host");
+            }
         }
     }
 }

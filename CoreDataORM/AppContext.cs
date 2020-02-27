@@ -33,6 +33,7 @@ namespace CoreDataORM
 
         public DbSet<Point> Points { get; set; }
         public DbSet<OauthLogin> OauthLogins { get; set; }
+        public DbSet<SlaveManager> SlaveManagers { get; set; }
 
         public DataContext(IOptions<Config> config)
         {
@@ -111,6 +112,11 @@ namespace CoreDataORM
                 entity.HasIndex(e => new { e.Id, e.LoginService });
                 entity.Property(e => e.LoginService).HasColumnType("varchar(64)");
                 entity.HasOne(e => e.User).WithOne(e => e.OauthLogin);
+            });
+
+            modelBuilder.Entity<SlaveManager>(entity =>
+            {
+                
             });
 
         }
