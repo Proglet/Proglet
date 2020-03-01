@@ -63,7 +63,7 @@ namespace API.Controllers
             MemoryStream ms = new MemoryStream();
             await Request.Body.CopyToAsync(ms);
 
-            dockerService.Callback(id, ms.ToArray());
+            dockerService.Callback(id, ms.ToArray(), _context);
             return Ok("ok");
         }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoreDataORM;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -9,14 +10,15 @@ namespace API.Services
     public interface IDockerService
     {
         void RegisterSlaveManager(string url);
-        void RunContainer(string image, Dictionary<string, string> environment, Action<byte[]> callback);
-        void Callback(string id, byte[] data);
+        void RunContainer(string image, Dictionary<string, string> environment, Delegate callback);
+        void Callback(string id, byte[] data, DataContext context);
     }
     public class DockerService : IDockerService
     {
         private List<string> urls = new List<string>();
         private static readonly HttpClient client = new HttpClient();
-        private Dictionary<string, Action<byte[]>> callbacks = new Dictionary<string, Action<byte[]>>();
+        private Dictionary<string, Delegate> callbacks = new Dictionary<string, Delegate>();
+
 
         public void RegisterSlaveManager(string url)
         {
@@ -24,7 +26,7 @@ namespace API.Services
                 urls.Add(url);
         }
 
-        public async void RunContainer(string image, Dictionary<string, string> environment, Action<byte[]> callback)
+        public async void RunContainer(string image, Dictionary<string, string> environment, Delegate callback)
         {
             var values = new Dictionary<string, string>
             {
@@ -40,10 +42,24 @@ namespace API.Services
             callbacks[responseString] = callback;
         }
 
-        public void Callback(string id, byte[] data)
+        public void Callback(string id, byte[] data, DataContext dataContext)
         {
             if (callbacks.ContainsKey(id))
-                callbacks[id](data);
+            {
+                //deligate voodoo magic, look up the parameters of the delegate entered, and fill them in
+                Delegate callback = callbacks[id];
+                var parameters = callback.Method.GetParameters();
+                object[] p = new object[parameters.Length];
+                for(int i = 0; i < parameters.Length; i++)
+                {
+                    var type = parameters[i].ParameterType;
+                    if (type == typeof(byte[]))
+                        p[i] = data;
+                    if (type == typeof(DataContext))
+                        p[i] = dataContext;
+                }
+                callback.DynamicInvoke(p);
+            }
         }
     }
 }

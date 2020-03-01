@@ -13,6 +13,8 @@ namespace Proglet.Core.Data
 
         public long ExerciseId { get; set; }
 
+        public long CourseId { get; set; }
+        [ForeignKey("CourseId")]
         public Course Course { get; set; }
 
         [Column(TypeName = "VARCHAR(64)")]
@@ -30,7 +32,12 @@ namespace Proglet.Core.Data
         [Column(TypeName = "bit")]
         public bool Hidden { get; set; }
 
-        public Guid Checksum { get; set; }
+        //TODO: make this a binary value
+        [Column(TypeName = "varchar(64)")]
+        public string Checksum { get; set; }
+        public int Size { get; set; }
+
+        public int Version { get; set; }
 
         public DateTime SolutionVisableAfter { get; set; }
 

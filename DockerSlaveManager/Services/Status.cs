@@ -4,6 +4,7 @@
     {
         Queued,
         Running,
-        Done
+        Done,
+        Fetched
     }
 }

@@ -49,27 +49,39 @@ namespace DockerSlaveManager
                 endpoints.MapControllers();
             });
 
-            //register self at API host
-            string ApiUrl = Configuration.GetValue<string>("ApiUrl");
-            string MyUrl = Configuration.GetValue<string>("MyUrl");
-            string Auth = Configuration.GetValue<string>("Auth");
+            for (int i = 0; i < 5; i++)
+            {
+                //register self at API host
+                string ApiUrl = Configuration.GetValue<string>("ApiUrl");
+                string MyUrl = Configuration.GetValue<string>("MyUrl");
+                string Auth = Configuration.GetValue<string>("Auth");
 
-            var client = new HttpClient();
-            string parameters = JsonSerializer.Serialize(new
-            {
-                Url = MyUrl,
-                Auth = Auth,
-            });
-            var response = await client.PostAsync(ApiUrl + "/api/slaves/register", new StringContent(parameters, System.Text.Encoding.UTF8, "application/json"));
-            if (!response.IsSuccessStatusCode)
-            {
-                Console.WriteLine("Could not connect to API, closing");
-                Program.Shutdown();
+                var client = new HttpClient();
+                string parameters = JsonSerializer.Serialize(new
+                {
+                    Url = MyUrl,
+                    Auth = Auth,
+                });
+                try
+                {
+                    var response = await client.PostAsync(ApiUrl + "/api/slaves/register", new StringContent(parameters, System.Text.Encoding.UTF8, "application/json"));
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("API denied access, retrying");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Registered and confirmed at API host");
+                        return;
+                    }
+                }
+                catch (HttpRequestException)
+                {
+                    Console.WriteLine("Could not connect to API, closing");
+                }
+                await Task.Delay(2000);
             }
-            else
-            {
-                Console.WriteLine("Registered and confirmed at API host");
-            }
+            Program.Shutdown();
         }
     }
 }
