@@ -18,7 +18,7 @@ namespace Proglet.Core.Data.Internal
         [Column(TypeName = "text")]
         public string Description { get; set; }
 
-        public long CourseTemplateId { get; set; }
+        public int CourseTemplateId { get; set; }
 
         [Column(TypeName = "varchar(255)")]
         public string GitUrl { get; set; }

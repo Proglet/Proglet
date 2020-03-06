@@ -9,7 +9,7 @@ namespace Proglet.Core.Data
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public long PointId { get; set; }
+        public int PointId { get; set; }
 
         public Exercise Exercise { get; set; } // Of andersom?
 

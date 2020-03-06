@@ -10,7 +10,7 @@ namespace Proglet.Core.Data
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public long SubmissionId { get; set; }
+        public int SubmissionId { get; set; }
 
         public User User { get; set; }
 

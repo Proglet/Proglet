@@ -26,15 +26,15 @@ namespace API.Controllers
         // GET: api/Courses
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Object>>> GetCourses()
-        { 
+        {
             int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value);
 
             return await _context.Courses
                 .Include(e => e.CourseTemplate)
                 .Where(e => e.Enabled && e.HidderAfter > DateTime.Now)
-                .Select(e => new 
-                { 
-                    id = e.CourseId, 
+                .Select(e => new
+                {
+                    id = e.CourseId,
                     Name = e.CourseTemplate.Name,
                     Title = e.CourseTemplate.Title,
                     Description = e.CourseTemplate.Description,
@@ -42,101 +42,38 @@ namespace API.Controllers
                 }).ToListAsync();
         }
 
-        // GET: api/Courses/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Course>> GetCourse(long id)
+
+        [HttpPost("Enroll/{id}")]
+        public ActionResult Enroll(int id)
         {
-            var course = await _context.Courses.FindAsync(id);
+            int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value);
+            CourseRegistration cr = _context.CourseRegistrations.Where(cr => cr.CourseId == id && cr.UserId == userId).FirstOrDefault();
 
-            if (course == null)
+            if (cr == null)
             {
-                return NotFound();
-            }
-
-            return course;
-        }
-
-
-        // GET: api/Courses/CourseByUser
-        //[HttpGet("/CourseByUser/{username}")]
-        //public async Task<ActionResult<IEnumerable<Course>>> GetCourseByUser(string username)
-        //{
-        //    //var course = await _context.Courses.FindAsync(id);
-
-
-        //    var courses = await _context.Courses.Where(c => c.CreatedBy.Username == username).ToListAsync();
-
-        //    if (courses == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return courses;
-        //}
-
-        // PUT: api/Courses/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCourse(long id, Course course)
-        {
-            if (id != course.CourseId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(course).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CourseExists(id))
+                cr = new CourseRegistration()
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                    UserId = userId,
+                    CourseId = id,
+                    Active = true
+                };
+                _context.CourseRegistrations.Add(cr);
             }
-
-            return NoContent();
+            else
+                cr.Active = true;
+            _context.SaveChanges();
+            return Ok("enrolled");
         }
-
-        // POST: api/Courses
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPost]
-        public async Task<ActionResult<Course>> PostCourse(Course course)
+        [HttpPost("Unregister/{id}")]
+        public ActionResult Unregister(int id)
         {
-            _context.Courses.Add(course);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetCourse", new { id = course.CourseId }, course);
+            int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value);
+            CourseRegistration cr = _context.CourseRegistrations.Where(cr => cr.CourseId == id && cr.UserId == userId).FirstOrDefault();
+            if (cr != null)
+                cr.Active = false;
+            _context.SaveChanges();
+            return Ok("unregistered");
         }
 
-        // DELETE: api/Courses/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Course>> DeleteCourse(long id)
-        {
-            var course = await _context.Courses.FindAsync(id);
-            if (course == null)
-            {
-                return NotFound();
-            }
-
-            _context.Courses.Remove(course);
-            await _context.SaveChangesAsync();
-
-            return course;
-        }
-
-        private bool CourseExists(long id)
-        {
-            return _context.Courses.Any(e => e.CourseId == id);
-        }
     }
 }

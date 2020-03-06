@@ -11,8 +11,10 @@ namespace Proglet.Core.Data
     {
         public event PropertyChangedEventHandler PropertyChanged;
         public int UserId { get; set; }
+        [ForeignKey("UserId")]
         public User User { get; set; }
         public int CourseId { get; set; }
+        [ForeignKey("CourseId")]
         public Course Course { get; set; }
 
         [Column(TypeName = "bit")]

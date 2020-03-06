@@ -11,7 +11,7 @@ namespace Proglet.Core.Data
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public long CourseId { get; set; }
+        public int CourseId { get; set; }
 
         [Column(TypeName = "bit")]
         public bool Enabled { get; set; }

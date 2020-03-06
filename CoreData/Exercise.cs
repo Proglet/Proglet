@@ -11,9 +11,9 @@ namespace Proglet.Core.Data
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public long ExerciseId { get; set; }
+        public int ExerciseId { get; set; }
 
-        public long CourseId { get; set; }
+        public int CourseId { get; set; }
         [ForeignKey("CourseId")]
         public Course Course { get; set; }
 
