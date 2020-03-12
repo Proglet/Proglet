@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
@@ -37,6 +38,8 @@ namespace DockerSlaveManager
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public async void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            if (!Directory.Exists("data"))
+                Directory.CreateDirectory("data");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

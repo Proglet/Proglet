@@ -26,9 +26,11 @@ namespace API.Controllers
         {
             _context = context;
             this.dockerService = dockerService;
+            if (!Directory.Exists("data/templates"))
+                Directory.CreateDirectory("data/templates");
         }
 
-       
+
         class JsonCourseInfo
         {
             public string subject { get; set; }
@@ -50,6 +52,10 @@ namespace API.Controllers
                 ZipArchive archive = new ZipArchive(new MemoryStream(data));
                 foreach(var entry in archive.Entries)
                     Console.WriteLine(entry.FullName);
+
+                if (Directory.Exists("data/templates/" + id))
+                    Directory.Delete("data/templates/" + id, true);
+                Directory.CreateDirectory("data/templates/" + id);
                 using (var exercisesStream = archive.GetEntry("exercises.json").Open())
                 {
                     //TODO: remove/disable exercises that are in database but not in json file
@@ -106,8 +112,14 @@ namespace API.Controllers
 
 
                     }
-
                 }
+                //TODO: determine what zipfiles to copy, softcode in some kind of configfile?
+                using (var zipStream = archive.GetEntry("ExampleCourse-Intellij-EduTools.zip").Open())
+                using(var outStream = new FileStream("data/templates/" + id + "/project.zip", FileMode.Create))
+                {
+                    zipStream.CopyTo(outStream);
+                }
+
 
                 Console.WriteLine(data);
             }));

@@ -75,5 +75,21 @@ namespace API.Controllers
             return Ok("unregistered");
         }
 
+
+        [HttpGet("DownloadMainProject/{id}")]
+        public ActionResult DownloadMainProject(int id)
+        {
+            int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value);
+            CourseRegistration cr = _context.CourseRegistrations.Where(cr => cr.CourseId == id && cr.UserId == userId).Include(cr => cr.Course).Include(cr => cr.Course.CourseTemplate).FirstOrDefault();
+            if (cr == null)
+                return Problem("Not enrolled in this course");
+
+            int templateId = cr.Course.CourseTemplate.CourseTemplateId;
+
+            var content = System.IO.File.ReadAllBytes("data/templates/" + templateId + "/project.zip");
+            var contentType = "Application/octet-stream";
+            var fileName = "Project.zip";
+            return File(content, contentType, fileName);
+        }
     }
 }
