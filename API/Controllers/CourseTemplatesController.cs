@@ -90,11 +90,14 @@ namespace API.Controllers
                         {
                             CourseId = id,
                             Name = exercise.name,
-                            Subject = exercise.name,
+                            Subject = exercise.subject,
                             Version = version,
                             Checksum = exercise.hash,
                             Size = exercise.size,
                             CreatedAt = DateTime.Now,
+                            UpdatedAt = DateTime.Now,
+                            PublishDate = DateTime.Now,
+                            SolutionVisableAfter = DateTime.Now
                         };
                         dbcontext.Exercises.Add(ex);
                         dbcontext.SaveChanges();

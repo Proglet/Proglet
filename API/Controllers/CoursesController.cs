@@ -38,6 +38,7 @@ namespace API.Controllers
                     Name = e.CourseTemplate.Name,
                     Title = e.CourseTemplate.Title,
                     Description = e.CourseTemplate.Description,
+                    Curriculum = e.Curriculum,
                     Registered = e.Users.Any(u => u.UserId == userId && u.Active)
                 }).ToListAsync();
         }
