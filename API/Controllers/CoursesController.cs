@@ -8,6 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using CoreDataORM;
 using Proglet.Core.Data;
 using Microsoft.AspNetCore.Authorization;
+using System.IO.Compression;
+using System.IO;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace API.Controllers
 {
@@ -76,7 +80,12 @@ namespace API.Controllers
             return Ok("unregistered");
         }
 
-
+        /// <summary>
+        /// Downloads the main project file
+        /// uses the project.zip file in the template, updates the infofile and adds a field to the course-info.yaml to add the courseid so the proglet plugin knows where to submit back to
+        /// </summary>
+        /// <param name="id">The project ID</param>
+        /// <returns></returns>
         [HttpGet("DownloadMainProject/{id}")]
         public ActionResult DownloadMainProject(int id)
         {
@@ -86,11 +95,49 @@ namespace API.Controllers
                 return Problem("Not enrolled in this course");
 
             int templateId = cr.Course.CourseTemplate.CourseTemplateId;
+            string zipFileName = "data/templates/" + templateId + "/project.zip";
 
-            var content = System.IO.File.ReadAllBytes("data/templates/" + templateId + "/project.zip");
-            var contentType = "Application/octet-stream";
-            var fileName = "Project.zip";
-            return File(content, contentType, fileName);
+            //TODO: move this to some methods
+            Dictionary<string, object> infoYaml;
+
+            using (var fs = new FileStream(zipFileName, FileMode.Open))
+            using(var zipFile = new ZipArchive(fs))
+            { 
+                ZipArchiveEntry info = zipFile.GetEntry("course-info.yaml");
+                using (var stream = info.Open())
+                using (var reader = new StreamReader(stream))
+                {
+                    var deserializer = new DeserializerBuilder()
+                                   .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                                   .Build();
+                    infoYaml = deserializer.Deserialize<Dictionary<string,object>>(reader);
+                }
+            }
+            infoYaml["title"] = cr.Course.CourseTemplate.Name + " - " + cr.Course.Curriculum;
+            infoYaml["courseid"] = id;
+
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+            var newInfo = serializer.Serialize(infoYaml);
+
+            using (var newFile = new MemoryStream())
+            {
+                using (var fs = new FileStream(zipFileName, FileMode.Open))
+                    fs.CopyTo(newFile);
+                using (var zipFile = new ZipArchive(newFile, ZipArchiveMode.Update))
+                {
+                    ZipArchiveEntry info = zipFile.GetEntry("course-info.yaml");
+                    using (var stream = info.Open())
+                    using (var writer = new StreamWriter(stream))
+                        writer.Write(newInfo);
+                }
+
+
+                var contentType = "Application/octet-stream";
+                var fileName = "Project.zip";
+                return File(newFile.ToArray(), contentType, fileName);
+            }
         }
     }
 }
