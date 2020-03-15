@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CoreDataORM;
 using Proglet.Core.Data;
+using API.Models.Multipart;
 
 namespace API.Controllers
 {
@@ -19,6 +20,16 @@ namespace API.Controllers
         public ExercisesController(DataContext context)
         {
             _context = context;
+        }
+
+
+        [HttpPost("Submit")]
+        public IActionResult Submit([FromForm] ExerciseSubmission submission)
+        {
+            Console.WriteLine(submission.CourseId);
+            Console.WriteLine(submission.ExerciseName);
+            Console.WriteLine(submission.Data.FileName);
+            return Ok();
         }
 
 
