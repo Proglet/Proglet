@@ -13,55 +13,81 @@ namespace API.Services
 {
     public interface ISubmissionsService
     {
-        Submission Queue(int userId, ExerciseSubmission submission, string ip, DataContext context);
+        Submission Queue(int userId, ExerciseSubmission submission, string ip);
     }
 
 
     public class SubmissionsService : BackgroundService, ISubmissionsService
     {
         private EventWaitHandle waitHandle;
+        private IDockerService dockerService;
+
+        public SubmissionsService(IDockerService dockerService)
+        {
+            this.dockerService = dockerService;
+        }
+
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+            await Task.Delay(3000); //omg yuck
 
             while (!cancellationToken.IsCancellationRequested)
             {
                 waitHandle.WaitOne(TimeSpan.FromSeconds(1));
 
-                //TODO: get a context here... :(
+                using (var context = new DataContext(null))
+                {
+                    context.Submissions
+                        .Where(s => !s.Processed)
+                        .ToList()
+                        .ForEach(s =>
+                        {
+                            dockerService.RunContainer("", new Dictionary<string, string>(), new Action<byte[]>((data) =>
+                            {
+
+                            }));
+                            //s.Processed = true;
+                            Console.WriteLine($"Processing submission {s.SubmissionId}");
+                        });
+                    await context.SaveChangesAsync();
+                }
             }
         }
 
 
-        public Submission Queue(int userId, ExerciseSubmission submission, string ip, DataContext context)
+        public Submission Queue(int userId, ExerciseSubmission submission, string ip)
         {
-            CourseRegistration cr = context.CourseRegistrations.Where(cr => cr.CourseId == submission.CourseId && cr.UserId == userId).FirstOrDefault();
-            if (cr == null || !cr.Active)
-                throw new Exception("You are not registered for this course");
+            using (var context = new DataContext(null))
+            {
+                CourseRegistration cr = context.CourseRegistrations.Where(cr => cr.CourseId == submission.CourseId && cr.UserId == userId).FirstOrDefault();
+                if (cr == null || !cr.Active)
+                    throw new Exception("You are not registered for this course");
 
-            string exerciseSubject = submission.ExerciseName.Substring(0, submission.ExerciseName.IndexOf("/"));
-            string exerciseName = submission.ExerciseName.Substring(submission.ExerciseName.IndexOf("/")+1);
+                string exerciseSubject = submission.ExerciseName.Substring(0, submission.ExerciseName.IndexOf("/"));
+                string exerciseName = submission.ExerciseName.Substring(submission.ExerciseName.IndexOf("/")+1);
 
-            Exercise exercise = context.Exercises
-                .Where(e => e.Name == exerciseName && e.Subject == exerciseSubject)
-                .FirstOrDefault();
+                Exercise exercise = context.Exercises
+                    .Where(e => e.Name == exerciseName && e.Subject == exerciseSubject)
+                    .FirstOrDefault();
 
-            if (exercise == null)
-                throw new Exception("Exercise not found");
+                if (exercise == null)
+                    throw new Exception("Exercise not found");
 
-            Submission s = new Submission();
-            s.User = cr.User;
-            s.Exercise = exercise;
-            s.Processed = false;
-            s.SubmissionIp = ip;
-            s.SubmissionTime = DateTime.Now;
-            s.SubmissionZip = new BinaryReader(submission.Data.OpenReadStream()).ReadBytes((int)submission.Data.Length);
+                Submission s = new Submission();
+                s.User = cr.User;
+                s.Exercise = exercise;
+                s.Processed = false;
+                s.SubmissionIp = ip;
+                s.SubmissionTime = DateTime.Now;
+                s.SubmissionZip = new BinaryReader(submission.Data.OpenReadStream()).ReadBytes((int)submission.Data.Length);
 
-            context.Submissions.Add(s);
-            context.SaveChanges();
+                context.Submissions.Add(s);
+                context.SaveChanges();
+                waitHandle.Set();
+                return s;
+            }
 
-            waitHandle.Set();
-            return s;
         }
     }
 }

@@ -15,7 +15,7 @@ namespace CoreDataORM
 {
     public class DataContext : DbContext
     {
-        private Config config;
+        static private Config config; //this is dirty, but it makes it so that we can call the constructor without parameters with the proper config
 
         /*public DataContext(DbContextOptions<AppContext> options)
 : base(options)
@@ -37,8 +37,10 @@ namespace CoreDataORM
 
         public DataContext(IOptions<Config> config)
         {
-            this.config = config.Value;
+            if(config != null)
+                DataContext.config = config.Value;
         }
+
 
         private ILoggerFactory GetLoggerFactory()
         {
