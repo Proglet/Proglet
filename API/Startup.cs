@@ -47,6 +47,10 @@ namespace API
             services.AddSingleton<IDockerService, DockerService>();
             services.AddSingleton<LoginOauthSessionService>();
             services.AddScoped<ILoginService, LoginService>();
+            services.AddScoped<ISubmissionsService, SubmissionsService>();
+            
+            services.AddSingleton<IHostedService, SubmissionsService>();
+            services.AddSingleton<SubmissionsService>(sp => sp.GetServices<IHostedService>().ToList().Find(x => x.GetType() == typeof(SubmissionsService)) as SubmissionsService);
 
 
 

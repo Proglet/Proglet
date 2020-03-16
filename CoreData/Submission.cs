@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
@@ -28,12 +29,14 @@ namespace Proglet.Core.Data
 
 
         // Client info fields
+        [Column(TypeName = "varchar(16)")]
         public string SubmissionIp { get; set; }
 
         public DateTime SubmissionTime { get; set; }
 
 
-        [NotMapped]
+        //data
+        [MaxLength(1024*1024*16), Column(TypeName = "LongBlob")] 
         public byte[] SubmissionZip { get; set; }
 
 

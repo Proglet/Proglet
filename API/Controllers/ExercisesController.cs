@@ -23,14 +23,6 @@ namespace API.Controllers
         }
 
 
-        [HttpPost("Submit")]
-        public IActionResult Submit([FromForm] ExerciseSubmission submission)
-        {
-            Console.WriteLine(submission.CourseId);
-            Console.WriteLine(submission.ExerciseName);
-            Console.WriteLine(submission.Data.FileName);
-            return Ok();
-        }
 
 
     }
