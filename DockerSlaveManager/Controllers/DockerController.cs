@@ -23,7 +23,7 @@ namespace DockerSlaveManager.Controllers
         [HttpPost("run")]
         public IActionResult Run([FromForm] RunConfig runConfig)
         {
-            if (!runConfig.Image.StartsWith("proglet/"))
+            if (runConfig.Image == null || !runConfig.Image.StartsWith("proglet/"))
                 return Problem("Image not allowed");
             var id = dockerService.RunContainerBackground(runConfig);
             return Ok(id);

@@ -1,4 +1,5 @@
 ﻿using API.Controllers;
+using API.Models;
 using API.Settings;
 using CoreDataORM;
 using Microsoft.AspNetCore.Http;
@@ -25,7 +26,7 @@ namespace API.Services
 {
     public interface ILoginService
     {
-        List<string> GetLoginMethods();
+        List<LoginMethod> GetLoginMethods();
 
         //TODO: don't send the request along, it's just needed for OAuth return url
         object HandleLogin(string loginservice, JsonElement body, HttpRequest request);
@@ -52,9 +53,9 @@ namespace API.Services
 
        
 
-        public List<string> GetLoginMethods()
+        public List<LoginMethod> GetLoginMethods()
         {
-            return loginSettings.Keys.ToList();
+            return loginSettings.Select(kv => new LoginMethod() { Name = kv.Key, Type = kv.Value.Type }).ToList();
         }
 
         public object HandleLogin(string loginservice, JsonElement body, HttpRequest request)
@@ -74,9 +75,11 @@ namespace API.Services
 
         private object HandleLoginOauth(LoginInfo login, JsonElement body, HttpRequest clientRequest)
         {
+            var returnAddress = body.GetProperty("return").GetString();
+
             OAuthRequest client = OAuthRequest.ForRequestToken(login.OAuth.ConsumerKey, login.OAuth.ConsumerSecret);
             client.RequestUrl = login.OAuth.RequestUrl;
-            client.CallbackUrl = clientRequest.Scheme + "://" + clientRequest.Host + "/api/login/oauth"; //TODO: softcode this better?
+            client.CallbackUrl = returnAddress;
 
             //make request for a token
             var url = client.RequestUrl + "?" + client.GetAuthorizationQuery();

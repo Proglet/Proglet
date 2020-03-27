@@ -38,7 +38,7 @@ namespace API.Services
 
                 using (var context = new DataContext(null))
                 {
-                    context.Submissions
+                /*    context.Submissions
                         .Where(s => !s.Processed)
                         .ToList()
                         .ForEach(s =>
@@ -50,7 +50,7 @@ namespace API.Services
                             //s.Processed = true;
                             Console.WriteLine($"Processing submission {s.SubmissionId}");
                         });
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync();*/
                 }
             }
         }
