@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
@@ -19,6 +20,7 @@ namespace Proglet.Core.Data
         public Course CourseTemplate { get; set; }
 
         [Column(TypeName = "VARCHAR(64)")]
+        [Required]
         public string Name { get; set; }
         
         [Column(TypeName = "VARCHAR(64)")]

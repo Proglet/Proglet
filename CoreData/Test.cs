@@ -5,19 +5,17 @@ using System.Text;
 
 namespace Proglet.Core.Data
 {
-    public class Point : INotifyPropertyChanged
+    public class Test : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public int PointId { get; set; }
+        public int TestId { get; set; }
 
-        public Exercise Exercise { get; set; } 
-
-        public List<Test> Tests { get; set; }
+        public Point Point { get; set; }
 
         public string Name { get; set; }
 
-
+        public string ClassName { get; set; }
 
     }
 }

@@ -24,6 +24,7 @@ namespace Proglet.Core.Data
         public bool Processed { get; set; }
 
         // some fields with results
+        public List<TestResult> TestResults { get; set; }
 
 
 

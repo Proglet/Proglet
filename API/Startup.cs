@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using API.Services;
-using CoreDataORM;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +13,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Linq;
+using System.Diagnostics;
+using API.ORM;
 
 namespace API
 {
@@ -31,7 +32,7 @@ namespace API
         {
             services.Configure<Settings.Jwt>(Configuration.GetSection("jwt"));
             services.Configure<Settings.Login>(Configuration.GetSection("login"));
-            services.Configure<Config>(Configuration.GetSection("database"));
+            services.Configure<DatabaseConfig>(Configuration.GetSection("database"));
 
 
             services.AddDbContext<DataContext>();

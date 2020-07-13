@@ -4,10 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CoreDataORM;
 using Proglet.Core.Data;
 using API.Models.Multipart;
+using API.ORM;
 
 namespace API.Controllers
 {
