@@ -14,6 +14,7 @@ namespace Proglet.Core.Data
         public int Id { get; set; }
 
         public int OauthLoginId { get; set; }
+
         [Column(TypeName = "varchar(64)")]
         public string LoginService { get; set; }
 
