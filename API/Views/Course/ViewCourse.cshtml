@@ -1,0 +1,53 @@
+﻿@model API.Models.Frontend.Course.CourseModel
+<h1>Course</h1>
+<ul class="list-group">
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col">Name</div>
+            <div class="col">@Model.Course.CourseTemplate.Name</div>
+        </div>
+    </li>
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col">Title</div>
+            <div class="col">@Model.Course.CourseTemplate.Title</div>
+        </div>
+    </li>
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col">Description</div>
+            <div class="col">@Model.Course.CourseTemplate.Description</div>
+        </div>
+    </li>
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col">Material URL</div>
+            <div class="col">@Model.Course.CourseTemplate.MaterialUrl</div>
+        </div>
+    </li>
+</ul>
+
+<h2>Exercises</h2>
+<ul class="list-group">
+    @foreach (var exercise in Model.Exercises)
+    {
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col">@exercise.Subject</div>
+                <div class="col">@exercise.Name</div>
+                <div class="col">v@exercise.Version</div>
+                <div class="col">@exercise.Size bytes</div>
+            </div>
+        </li>
+    }
+</ul>
+
+<h2>Enrolled students</h2>
+<ul class="list-group">
+    @foreach (var student in Model.Enrolled)
+    {
+        <li class="list-group-item">
+            @student.Username
+        </li>
+    }
+</ul>

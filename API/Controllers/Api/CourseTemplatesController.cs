@@ -66,7 +66,7 @@ namespace API.Controllers
                         Console.WriteLine($"Checking exercise {exercise.subject}/{exercise.name}");
                         var lastExercise = dbcontext.Exercises
                             .Where(e =>
-                                e.Course.CourseId == id &&
+                                e.CourseTemplate.CourseTemplateId == id &&
                                 e.Name == exercise.name &&
                                 e.Subject == exercise.subject)
                             .OrderBy(e => e.Version)
@@ -88,7 +88,7 @@ namespace API.Controllers
                         }
                         var ex = new Exercise()
                         {
-                            CourseId = id,
+                            CourseTemplateId = id,
                             Name = exercise.name,
                             Subject = exercise.subject,
                             Version = version,

@@ -11,12 +11,13 @@ namespace Proglet.Core.Data
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public int CourseId { get; set; }
+        public int CourseTemplateId { get; set; }
+        [ForeignKey("CourseTemplateId")]
+        public CourseTemplate CourseTemplate { get; set; }
 
         [Column(TypeName = "bit")]
         public bool Enabled { get; set; }
 
-        public CourseTemplate CourseTemplate { get; set; }
         [Column(TypeName = "varchar(64)")]
         public string Curriculum { get; set; }
 

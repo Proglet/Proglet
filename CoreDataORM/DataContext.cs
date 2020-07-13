@@ -74,7 +74,7 @@ namespace CoreDataORM
 
             modelBuilder.Entity<Course>(entity =>
             {
-                entity.HasKey(e => e.CourseId);
+                entity.HasKey(e => e.CourseTemplateId);
                 entity.HasOne(e => e.CourseTemplate);
             });
 
@@ -98,7 +98,7 @@ namespace CoreDataORM
             {
                 entity.HasKey(e => e.ExerciseId);
                 entity.Property(e => e.Name).IsRequired();
-                entity.HasOne(d => d.Course);
+                entity.HasOne(d => d.CourseTemplate);
             });
 
             modelBuilder.Entity<Submission>(entity =>

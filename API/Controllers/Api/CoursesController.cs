@@ -38,7 +38,7 @@ namespace API.Controllers
                 .Where(e => e.Enabled && e.HidderAfter > DateTime.Now)
                 .Select(e => new
                 {
-                    id = e.CourseId,
+                    id = e.CourseTemplateId,
                     Name = e.CourseTemplate.Name,
                     Title = e.CourseTemplate.Title,
                     Description = e.CourseTemplate.Description,

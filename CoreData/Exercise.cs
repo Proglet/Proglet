@@ -13,9 +13,10 @@ namespace Proglet.Core.Data
 
         public int ExerciseId { get; set; }
 
-        public int CourseId { get; set; }
-        [ForeignKey("CourseId")]
-        public Course Course { get; set; }
+        public int CourseTemplateId { get; set; }
+        
+        [ForeignKey("CourseTemplateId")]
+        public Course CourseTemplate { get; set; }
 
         [Column(TypeName = "VARCHAR(64)")]
         public string Name { get; set; }

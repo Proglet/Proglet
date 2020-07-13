@@ -1,0 +1,12 @@
+﻿<h1>Courses</h1>
+<ul class="list-group">
+@foreach(var course in Model.Courses)
+{
+    <li class="list-group-item">
+        <a asp-area="" asp-controller="Course" asp-action="@course.CourseId">
+            <span class="badge-pill badge-primary float-right">@course.Curriculum</span>
+            @course.CourseTemplate.Title
+        </a>
+    </li>
+}
+</ul>

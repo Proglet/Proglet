@@ -35,7 +35,8 @@ namespace API
 
 
             services.AddDbContext<DataContext>();
-            services.AddControllers();
+            services.AddControllersWithViews();
+            services.AddRazorPages().AddRazorRuntimeCompilation();
 
     
 
@@ -109,6 +110,7 @@ namespace API
 
             //app.UseHttpsRedirection(); // Removed for proxy
 
+            app.UseStaticFiles();
             app.UseRouting();
 
             app.UseAuthentication();
@@ -116,7 +118,9 @@ namespace API
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }
