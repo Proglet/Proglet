@@ -1,4 +1,6 @@
 ﻿using API.ORM;
+using API.Settings;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +20,12 @@ namespace API.Services
         private List<string> urls = new List<string>();
         private static readonly HttpClient client = new HttpClient();
         private Dictionary<string, Delegate> callbacks = new Dictionary<string, Delegate>();
+        private Docker dockerConfig;
 
+        public DockerService(IOptions<Docker> config)
+        {
+            this.dockerConfig = config.Value;
+        }
 
         public void RegisterSlaveManager(string url)
         {
@@ -31,7 +38,7 @@ namespace API.Services
             var values = new Dictionary<string, string>
             {
                 { "Image", image },
-                { "CallbackUrl", "http://localhost:5000/api/slaves/callback" },
+                { "CallbackUrl", dockerConfig.CallbackUrl + "/api/slaves/callback" },
                 { "Environment[test]", "test2" },
                 { "ZipOverlay", "" }
             };

@@ -31,6 +31,7 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<Settings.Jwt>(Configuration.GetSection("jwt"));
+            services.Configure<Settings.Docker>(Configuration.GetSection("docker"));
             services.Configure<Settings.Login>(Configuration.GetSection("login"));
             services.Configure<DatabaseConfig>(Configuration.GetSection("database"));
 
