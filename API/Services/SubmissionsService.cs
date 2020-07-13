@@ -1,5 +1,6 @@
 ﻿using API.Models.Multipart;
 using CoreDataORM;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Proglet.Core.Data;
 using System;
@@ -38,19 +39,20 @@ namespace API.Services
 
                 using (var context = new DataContext(null))
                 {
-                /*    context.Submissions
+                    context.Submissions
                         .Where(s => !s.Processed)
                         .ToList()
                         .ForEach(s =>
                         {
-                            dockerService.RunContainer("", new Dictionary<string, string>(), new Action<byte[]>((data) =>
+                            /*dockerService.RunContainer("", new Dictionary<string, string>(), new Action<byte[]>((data) =>
                             {
+                                Console.WriteLine("Done testing exercise!");
 
-                            }));
-                            //s.Processed = true;
+                            }));*/
+                            s.Processed = true;
                             Console.WriteLine($"Processing submission {s.SubmissionId}");
                         });
-                    await context.SaveChangesAsync();*/
+                    await context.SaveChangesAsync();
                 }
             }
         }
@@ -60,7 +62,7 @@ namespace API.Services
         {
             using (var context = new DataContext(null))
             {
-                CourseRegistration cr = context.CourseRegistrations.Where(cr => cr.CourseId == submission.CourseId && cr.UserId == userId).FirstOrDefault();
+                CourseRegistration cr = context.CourseRegistrations.Where(cr => cr.CourseId == submission.CourseId && cr.UserId == userId).Include(cr => cr.User).FirstOrDefault();
                 if (cr == null || !cr.Active)
                     throw new Exception("You are not registered for this course");
 

@@ -55,14 +55,19 @@ package "" as CoursePackage {
   note top: TODO
 
   entity Point {
-    ---
+    * name : text
   }
-  note bottom: TODO
+
+  entity Test {
+    * name : text
+    * className : text
+  }
 
   CourseTemplate "1" -- "0...*" Course
 
   Exercise "1" -- "1...*" Point
   Exercise "1...*" -- "1" Course
+  Point "1...*" -- "1" Test
 }
 note top of CoursePackage : These tables change when a courses get updated
 
@@ -79,16 +84,17 @@ package "" as SubmissionPackage {
     *  zipfile : binary
     *  status : enum(queued,processing,done)
   }
-  entity SubmissionResult {
-    * result : text
+  entity TestResult {
+    * message : text
+    * stacktrace : text
     * passed : boolean
   }
 
   Submission "1" -- "0...*" User
   Submission "1" -- "0...*" Exercise
 
-  Submission "1" -- "0...*" SubmissionResult
-  SubmissionResult "1...*" -- "0...*" Point
+  Submission "1" -- "0...*" TestResult
+  TestResult "1...*" -- "0...*" Test
 }
 note bottom of SubmissionPackage : TODO
 
