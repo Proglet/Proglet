@@ -7,6 +7,6 @@ namespace API.Settings
 {
     public class Docker
     {
-        public string CallbackUrl;
+        public string CallbackUrl { get; set; }
     }
 }
