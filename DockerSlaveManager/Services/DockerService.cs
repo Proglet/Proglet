@@ -177,6 +177,7 @@ namespace DockerSlaveManager.Services
             if (runConfig.CallbackUrl != null)
             {
                 var client = new HttpClient();
+                Console.WriteLine("Posting results to " + runConfig.CallbackUrl + "/?id=" + id);
                 await client.PostAsync(runConfig.CallbackUrl + "/?id=" + id, new ByteArrayContent(File.ReadAllBytes(zipfile)));
             }
             Console.WriteLine($"Done running container {response.ID}");
