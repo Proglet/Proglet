@@ -15,6 +15,9 @@ using API.ORM;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// Controller to manage course templates. Can be used to refresh a course template
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class CourseTemplatesController : ControllerBase
@@ -28,16 +31,6 @@ namespace API.Controllers
             this.dockerService = dockerService;
             if (!Directory.Exists("data/templates"))
                 Directory.CreateDirectory("data/templates");
-        }
-
-
-        class JsonCourseInfo
-        {
-            public string subject { get; set; }
-            public string name { get; set; }
-            public string hash { get; set; }
-            public int size { get; set; }
-            public List<String> points { get; set; }
         }
 
         [HttpPost("refresh/{id}")]

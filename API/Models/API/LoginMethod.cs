@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace API.Models
 {
+    /// <summary>
+    /// A login method
+    /// </summary>
     public class LoginMethod
     {
         public string Name { get; set; }

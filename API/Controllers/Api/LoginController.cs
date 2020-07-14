@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using API.Models.API;
 using API.Services;
 using API.Settings;
 using Microsoft.AspNetCore.Authorization;
@@ -60,6 +61,7 @@ namespace API.Controllers
         /// <param name="oauth_verifier"></param>
         /// <returns></returns>
         [HttpGet("oauth")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "<Pending>")]
         public IActionResult OAuth(string oauth_token, string oauth_verifier)
         {
             return Ok(new
@@ -68,20 +70,6 @@ namespace API.Controllers
                 oauth_verifier = oauth_verifier
             });
         }
-
-
-        public class OauthFinishData
-        {
-            [Required]
-            public string oauth_token { get; set; }
-            [Required]
-            public string oauth_verifier { get; set; }
-            [Required]
-            public string jwt { get; set; }
-            [Required]
-            public string loginservice { get; set; }
-        }
-
 
         /// <summary>
         /// Finish up an OAuth login

@@ -10,12 +10,18 @@ using API.ORM;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// Controller for exercises. Will be used later to update/download individual exercises
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class ExercisesController : ControllerBase
     {
         private readonly DataContext _context;
 
+        /// <summary>
+        /// </summary>
+        /// <param name="context"></param>
         public ExercisesController(DataContext context)
         {
             _context = context;

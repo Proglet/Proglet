@@ -10,17 +10,29 @@ using Proglet.Core.Data;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// Shows different courses
+    /// </summary>
     [Route("[controller]")]
     [Controller]
     public class CourseController : Controller
     {
         private readonly DataContext context;
 
+        /// <summary>
+        /// DI constructor
+        /// </summary>
+        /// <param name="context"></param>
         public CourseController(DataContext context)
         {
             this.context = context;
         }
 
+        /// <summary>
+        /// Page showing info about a specific course
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public IActionResult ViewCourse(int id)
         {

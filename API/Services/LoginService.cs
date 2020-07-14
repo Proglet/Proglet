@@ -1,5 +1,6 @@
 ﻿using API.Controllers;
 using API.Models;
+using API.Models.API;
 using API.ORM;
 using API.Settings;
 using Microsoft.AspNetCore.Http;
@@ -24,18 +25,39 @@ using static API.Controllers.LoginController;
 
 namespace API.Services
 {
+    /// <summary>
+    /// Service to manage the login system
+    /// </summary>
     public interface ILoginService
     {
+        /// <summary>
+        /// </summary>
+        /// <returns>A list of available login methods</returns>
         List<LoginMethod> GetLoginMethods();
 
-        //TODO: don't send the request along, it's just needed for OAuth return url
+
+        /// <summary>
+        /// Handles a login. Login can be of different types, hence the generic parameters
+        /// TODO: don't send the request along, it's just needed for OAuth return url
+        /// </summary>
+        /// <param name="loginservice"></param>
+        /// <param name="body"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
         object HandleLogin(string loginservice, JsonElement body, HttpRequest request);
+
+
+        /// <summary>
+        /// Finishes up an oauth login
+        /// </summary>
+        /// <param name="finishData">Data needed to finish the oauth login sequence</param>
+        /// <returns></returns>
         object FinishOAuth(OauthFinishData finishData);
     }
 
 
 
-    public class LoginService : ILoginService
+    class LoginService : ILoginService
     {
         private Settings.Login loginSettings;
         private Settings.Jwt jwtSettings;

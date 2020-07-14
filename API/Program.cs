@@ -9,13 +9,22 @@ using Microsoft.Extensions.Logging;
 
 namespace API
 {
-    public class Program
+    public static class Program
     {
+        /// <summary>
+        /// Main program entry
+        /// </summary>
+        /// <param name="args"></param>
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
         }
 
+        /// <summary>
+        /// Host builder
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>

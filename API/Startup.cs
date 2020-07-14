@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using System.Linq;
 using System.Diagnostics;
 using API.ORM;
+using System.Diagnostics.CodeAnalysis;
 
 namespace API
 {
@@ -35,7 +36,7 @@ namespace API
             services.Configure<Settings.Login>(Configuration.GetSection("login"));
             services.Configure<DatabaseConfig>(Configuration.GetSection("database"));
 
-
+            services.AddHttpClient();
             services.AddDbContext<DataContext>();
             services.AddControllersWithViews();
             services.AddRazorPages().AddRazorRuntimeCompilation();
@@ -79,7 +80,7 @@ namespace API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, [NotNull] IWebHostEnvironment env)
         {
             using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             using (var context = scope.ServiceProvider.GetService<DataContext>())

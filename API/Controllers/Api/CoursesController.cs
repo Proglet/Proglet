@@ -12,9 +12,13 @@ using System.IO;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using API.ORM;
+using System.Globalization;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// Controller to manage courses. Can be used to list and enroll into courses
+    /// </summary>
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
@@ -27,11 +31,14 @@ namespace API.Controllers
             _context = context;
         }
 
-        // GET: api/Courses
+        /// <summary>
+        /// GET: api/Courses
+        /// </summary>
+        /// <returns>Returns a list of all courses available to the current user</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Object>>> GetCourses()
         {
-            int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value);
+            int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value, CultureInfo.InvariantCulture);
 
             return await _context.Courses
                 .Include(e => e.CourseTemplate)
@@ -51,7 +58,7 @@ namespace API.Controllers
         [HttpPost("Enroll/{id}")]
         public ActionResult Enroll(int id)
         {
-            int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value);
+            int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value, CultureInfo.InvariantCulture);
             CourseRegistration cr = _context.CourseRegistrations.Where(cr => cr.CourseId == id && cr.UserId == userId).FirstOrDefault();
 
             if (cr == null)

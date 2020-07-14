@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using API.Models.API;
 using API.ORM;
 using API.Services;
 using Microsoft.AspNetCore.Http;
@@ -12,6 +13,10 @@ using Proglet.Core.Data;
 
 namespace API.Controllers
 {
+
+    /// <summary>
+    /// Controller to send commands to Docker instances
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class SlavesController : ControllerBase
@@ -19,21 +24,28 @@ namespace API.Controllers
         private readonly DataContext _context;
         private IDockerService dockerService;
 
+        /// <summary>
+        /// Constructor called using DI
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="dockerService"></param>
         public SlavesController(DataContext context, IDockerService dockerService)
         {
             _context = context;
             this.dockerService = dockerService;
         }
 
-        public class RegisterData
-        {
-            public string Url { get; set; }
-            public string Auth { get; set; }
-        }
 
+        /// <summary>
+        /// API call to register a docker slave manager. Should contain registration info. If this slave is registered, and the key is valid, the manager is accepted
+        /// </summary>
+        /// <param name="registerData"></param>
+        /// <returns></returns>
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody]RegisterData registerData)
+        public async Task<IActionResult> Register([FromBody]DockerSlaveRegisterData registerData)
         {
+            if (registerData == null || registerData.Url == null || registerData.Auth == null)
+                return Problem("No registration data");
             var slaveManager = _context.SlaveManagers.Where(s => s.Url == registerData.Url).FirstOrDefault();
             if(slaveManager == null)
             {
@@ -60,10 +72,11 @@ namespace API.Controllers
         [HttpPost("callback")]
         public async Task<IActionResult> Callback(string id)
         {
-            MemoryStream ms = new MemoryStream();
-            await Request.Body.CopyToAsync(ms);
-
-            dockerService.Callback(id, ms.ToArray(), _context);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                await Request.Body.CopyToAsync(ms);
+                dockerService.Callback(id, ms.ToArray(), _context);
+            }
             return Ok("ok");
         }
 
