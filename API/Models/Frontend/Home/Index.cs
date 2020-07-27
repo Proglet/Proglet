@@ -8,6 +8,6 @@ namespace API.Models.Frontend.Home
 {
     public class Index
     {
-        public List<Proglet.Core.Data.Course> Courses { get; }
+        public List<Proglet.Core.Data.Course> Courses { get; set; }
     }
 }

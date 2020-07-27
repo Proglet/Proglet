@@ -63,12 +63,13 @@ namespace API.Controllers
                                 e.Name == exercise.name &&
                                 e.Subject == exercise.subject)
                             .OrderBy(e => e.Version)
+                            .Include(e => e.Points).ThenInclude(p => p.Tests)
                             .LastOrDefault();
                         int version = 1;
 
                         if(lastExercise != null)
                         {
-                            if (lastExercise.Checksum != exercise.hash || lastExercise.Size != exercise.size)
+                            if (lastExercise.Checksum != exercise.hash || lastExercise.Size != exercise.size || lastExercise.Points.Count != exercise.points.Count)
                             {
                                 version = lastExercise.Version + 1;
                                 Console.WriteLine($"Updating to version {version}");
@@ -100,7 +101,18 @@ namespace API.Controllers
                             dbcontext.Points.Add(new Point()
                             {
                                 Exercise = ex,
-                                Name = point
+                                Name = point,
+                            });
+                        }
+                        dbcontext.SaveChanges();
+
+                        foreach (var test in exercise.tests)
+                        {
+                            dbcontext.Tests.Add(new Test()
+                            {
+                                Point = dbcontext.Points.Where(p => p.Name == test.point && p.Exercise == ex).First(),
+                                ClassName = test.className,
+                                Name = test.name
                             });
                         }
                         dbcontext.SaveChanges();

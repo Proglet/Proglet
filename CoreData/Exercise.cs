@@ -50,6 +50,8 @@ namespace Proglet.Core.Data
 
         [Column(TypeName = "bit")]
         public bool CodeReviewEnable { get; set; }
+        public List<Point> Points { get; set; }
+
 
 
     }

@@ -35,7 +35,7 @@ namespace API.Services
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                waitHandle.WaitOne(TimeSpan.FromSeconds(1));
+                waitHandle.WaitOne(TimeSpan.FromSeconds(60));
 
                 using (var context = new DataContext(null))
                 {
