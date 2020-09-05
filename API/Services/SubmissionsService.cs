@@ -31,7 +31,7 @@ namespace API.Services
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
-            await Task.Delay(3000); //omg yuck
+            await Task.Delay(3000).ConfigureAwait(true); //omg yuck
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -52,7 +52,7 @@ namespace API.Services
                             s.Processed = true;
                             Console.WriteLine($"Processing submission {s.SubmissionId}");
                         });
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync().ConfigureAwait(true);
                 }
             }
         }
@@ -66,8 +66,8 @@ namespace API.Services
                 if (cr == null || !cr.Active)
                     throw new Exception("You are not registered for this course");
 
-                string exerciseSubject = submission.ExerciseName.Substring(0, submission.ExerciseName.IndexOf("/"));
-                string exerciseName = submission.ExerciseName.Substring(submission.ExerciseName.IndexOf("/")+1);
+                string exerciseSubject = submission.ExerciseName.Substring(0, submission.ExerciseName.IndexOf('/', StringComparison.InvariantCulture));
+                string exerciseName = submission.ExerciseName.Substring(submission.ExerciseName.IndexOf('/', StringComparison.InvariantCulture) +1);
 
                 Exercise exercise = context.Exercises
                     .Where(e => e.Name == exerciseName && e.Subject == exerciseSubject)
@@ -82,7 +82,10 @@ namespace API.Services
                 s.Processed = false;
                 s.SubmissionIp = ip;
                 s.SubmissionTime = DateTime.Now;
-                s.SubmissionZip = new BinaryReader(submission.Data.OpenReadStream()).ReadBytes((int)submission.Data.Length);
+                using (var br = new BinaryReader(submission.Data.OpenReadStream()))
+                {
+                    s.SubmissionZip = br.ReadBytes((int)submission.Data.Length);
+                }
 
                 context.Submissions.Add(s);
                 context.SaveChanges();

@@ -7,9 +7,8 @@ using System.Text;
 
 namespace Proglet.Core.Data
 {
-    public class CourseRegistration : INotifyPropertyChanged
+    public class CourseRegistration
     {
-        public event PropertyChangedEventHandler PropertyChanged;
         public int UserId { get; set; }
         [ForeignKey("UserId")]
         public User User { get; set; }

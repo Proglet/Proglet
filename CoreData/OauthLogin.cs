@@ -7,9 +7,9 @@ using System.Text;
 
 namespace Proglet.Core.Data
 {
-    public class OauthLogin : INotifyPropertyChanged
+    public class OauthLogin
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+
         [Key]
         public int Id { get; set; }
 

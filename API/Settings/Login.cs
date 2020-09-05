@@ -18,11 +18,11 @@ namespace API.Settings
 
     public class OAuth
     {
-        public string RequestUrl { get; set; }
-        public string LoginUrl { get; set; }
-        public string TokenUrl { get; set; }
-        public string InfoUrl { get; set; }
-        public string MoreInfoUrl { get; set; }
+        public Uri RequestUrl { get; set; }
+        public Uri LoginUrl { get; set; }
+        public Uri TokenUrl { get; set; }
+        public Uri InfoUrl { get; set; }
+        public Uri MoreInfoUrl { get; set; }
 
         public string ConsumerKey { get; set; }
         public string ConsumerSecret { get; set; }

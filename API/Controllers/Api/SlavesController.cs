@@ -56,7 +56,7 @@ namespace API.Controllers
                     Enabled = false
                 };
                 _context.SlaveManagers.Add(slaveManager);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync().ConfigureAwait(true);
             }
 
 
@@ -74,7 +74,7 @@ namespace API.Controllers
         {
             using (MemoryStream ms = new MemoryStream())
             {
-                await Request.Body.CopyToAsync(ms);
+                await Request.Body.CopyToAsync(ms).ConfigureAwait(true);
                 dockerService.Callback(id, ms.ToArray(), _context);
             }
             return Ok("ok");

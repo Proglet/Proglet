@@ -43,10 +43,13 @@ namespace API.Services
                 { "ZipOverlay", "" }
             };
 
-            var content = new FormUrlEncodedContent(values);
-            var response = await client.PostAsync(urls[0] + "/api/docker/run", content);
-            var responseString = await response.Content.ReadAsStringAsync();
-            callbacks[responseString] = callback;
+            using (var content = new FormUrlEncodedContent(values))
+            {
+                var response = await client.PostAsync(new Uri(urls[0] + "/api/docker/run"), content).ConfigureAwait(true);
+                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+                callbacks[responseString] = callback;
+            }
+            
         }
 
         public void Callback(string id, byte[] data, DataContext dataContext)

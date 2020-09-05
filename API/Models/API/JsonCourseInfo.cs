@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace API.Controllers
 {
-    class JsonCourseInfo
+    internal class JsonCourseInfo
     {
         public class Test
         {

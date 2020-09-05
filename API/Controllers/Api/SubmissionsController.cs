@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Proglet.Core.Data;
 using API.Models.Multipart;
 using API.Services;
+using System.Globalization;
 
 namespace API.Controllers
 {
@@ -26,7 +27,7 @@ namespace API.Controllers
         [HttpPost("Submit")]
         public IActionResult Submit([FromForm] ExerciseSubmission submission)
         {
-            int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value);
+            int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value, CultureInfo.InvariantCulture);
 
             Submission newSubmission = submissions.Queue(
                 userId: userId, 

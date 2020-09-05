@@ -46,12 +46,12 @@ namespace API.Controllers
                 .Select(e => new
                 {
                     id = e.CourseTemplateId,
-                    Name = e.CourseTemplate.Name,
-                    Title = e.CourseTemplate.Title,
-                    Description = e.CourseTemplate.Description,
-                    Curriculum = e.Curriculum,
+                    e.CourseTemplate.Name,
+                    e.CourseTemplate.Title,
+                    e.CourseTemplate.Description,
+                    e.Curriculum,
                     Registered = e.Users.Any(u => u.UserId == userId && u.Active)
-                }).ToListAsync();
+                }).ToListAsync().ConfigureAwait(true);
         }
 
 
@@ -79,7 +79,7 @@ namespace API.Controllers
         [HttpPost("Unregister/{id}")]
         public ActionResult Unregister(int id)
         {
-            int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value);
+            int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value, CultureInfo.InvariantCulture);
             CourseRegistration cr = _context.CourseRegistrations.Where(cr => cr.CourseId == id && cr.UserId == userId).FirstOrDefault();
             if (cr != null)
                 cr.Active = false;
@@ -96,7 +96,7 @@ namespace API.Controllers
         [HttpGet("DownloadMainProject/{id}")]
         public ActionResult DownloadMainProject(int id)
         {
-            int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value);
+            int userId = int.Parse(User.Claims.First(c => c.Type == "client_id").Value, CultureInfo.InvariantCulture);
             CourseRegistration cr = _context.CourseRegistrations.Where(cr => cr.CourseId == id && cr.UserId == userId).Include(cr => cr.Course).Include(cr => cr.Course.CourseTemplate).FirstOrDefault();
             if (cr == null)
                 return Problem("Not enrolled in this course");

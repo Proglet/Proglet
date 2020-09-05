@@ -5,9 +5,8 @@ using System.Text;
 
 namespace Proglet.Core.Data
 {
-    public class Test : INotifyPropertyChanged
+    public class Test
     {
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public int TestId { get; set; }
 

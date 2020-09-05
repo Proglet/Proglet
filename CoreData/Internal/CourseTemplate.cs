@@ -7,9 +7,8 @@ using System.Text;
 
 namespace Proglet.Core.Data.Internal
 {
-    public class CourseTemplate : INotifyPropertyChanged
+    public class CourseTemplate
     {
-        public event PropertyChangedEventHandler PropertyChanged;
         [Column(TypeName = "varchar(64)")]
         [Required]
         public string Name { get; set; }

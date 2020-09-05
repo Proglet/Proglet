@@ -7,9 +7,8 @@ using System.Text;
 
 namespace Proglet.Core.Data
 {
-    public class SlaveManager : INotifyPropertyChanged
+    public class SlaveManager
     {
-        public event PropertyChangedEventHandler PropertyChanged;
 
         [Key]
         public int Id { get; set; }

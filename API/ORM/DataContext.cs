@@ -6,6 +6,7 @@ using Proglet.Core.Data;
 using Proglet.Core.Data.Internal;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -62,7 +63,7 @@ namespace API.ORM
 
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating([NotNull]ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 

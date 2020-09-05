@@ -8,10 +8,8 @@ using System.Runtime.CompilerServices;
 namespace Proglet.Core.Data
 {
 
-    public class User : INotifyPropertyChanged
+    public class User
     {
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         [Key]
         public int UserId { get; set; }

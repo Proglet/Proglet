@@ -8,9 +8,8 @@ using System.Text;
 namespace Proglet.Core.Data
 {
 #nullable enable
-    public class Exercise : INotifyPropertyChanged
+    public class Exercise
     {
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public int ExerciseId { get; set; }
 

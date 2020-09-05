@@ -12,6 +12,7 @@ using OAuth;
 using Proglet.Core.Data;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
@@ -100,14 +101,18 @@ namespace API.Services
             var returnAddress = body.GetProperty("return").GetString();
 
             OAuthRequest client = OAuthRequest.ForRequestToken(login.OAuth.ConsumerKey, login.OAuth.ConsumerSecret);
-            client.RequestUrl = login.OAuth.RequestUrl;
+            client.RequestUrl = login.OAuth.RequestUrl.ToString();
             client.CallbackUrl = returnAddress;
 
             //make request for a token
-            var url = client.RequestUrl + "?" + client.GetAuthorizationQuery();
+            var url = new Uri(client.RequestUrl + "?" + client.GetAuthorizationQuery());
             var request = (HttpWebRequest)WebRequest.Create(url);
             var response = (HttpWebResponse)request.GetResponse();
-            string querystring = new StreamReader(response.GetResponseStream()).ReadToEnd();
+            string querystring;
+            using (var s = new StreamReader(response.GetResponseStream()))
+            {
+                querystring = s.ReadToEnd();
+            }
             var query = HttpUtility.ParseQueryString(querystring);
 
             //store request in a temporary session
@@ -158,16 +163,20 @@ namespace API.Services
 
             //confirm authenticity
             var client = OAuthRequest.ForRequestToken(login.OAuth.ConsumerKey, login.OAuth.ConsumerSecret);
-            client.RequestUrl = login.OAuth.TokenUrl;
+            client.RequestUrl = login.OAuth.TokenUrl.ToString();
             client.Token = finishData.oauth_token;
             client.TokenSecret = token_secret;
             client.Verifier = finishData.oauth_verifier;
 
             //make request
-            var url = client.RequestUrl + "?" + client.GetAuthorizationQuery();
+            var url = new Uri(client.RequestUrl + "?" + client.GetAuthorizationQuery());
             var request = (HttpWebRequest)WebRequest.Create(url);
             var response = (HttpWebResponse)request.GetResponse();
-            string querystring = new StreamReader(response.GetResponseStream()).ReadToEnd();
+            string querystring;
+            using (var sr = new StreamReader(response.GetResponseStream()))
+            {
+                querystring = sr.ReadToEnd();
+            }
             var query = HttpUtility.ParseQueryString(querystring);
 		    var oauth_token = query["oauth_token"];
 		    var oauth_token_secret = query["oauth_token_secret"];
@@ -175,18 +184,22 @@ namespace API.Services
 
             //make a request for information
             this.validatedClient = OAuthRequest.ForRequestToken(login.OAuth.ConsumerKey, login.OAuth.ConsumerSecret);
-            this.validatedClient.RequestUrl = login.OAuth.InfoUrl;
+            this.validatedClient.RequestUrl = login.OAuth.InfoUrl.ToString();
             this.validatedClient.Token = oauth_token;
             this.validatedClient.TokenSecret = oauth_token_secret;
 
             //make request
-            url = this.validatedClient.RequestUrl + "?" + this.validatedClient.GetAuthorizationQuery();
+            url = new Uri(this.validatedClient.RequestUrl + "?" + this.validatedClient.GetAuthorizationQuery());
             request = (HttpWebRequest)WebRequest.Create(url);
             response = (HttpWebResponse)request.GetResponse();
-            string info = new StreamReader(response.GetResponseStream()).ReadToEnd();
+            string info;
+            using (var s = new StreamReader(response.GetResponseStream()))
+            {
+                info = s.ReadToEnd();
+            }
             JsonElement infoJson = JsonSerializer.Deserialize<JsonElement>(info);
             string loginName = infoJson[0].GetProperty("inlognaam").GetString();
-            int id = int.Parse(infoJson[0].GetProperty("studentnummer").GetString());
+            int id = int.Parse(infoJson[0].GetProperty("studentnummer").GetString(), CultureInfo.InvariantCulture);
 
             var user = CheckOauthLogin(finishData.loginservice, id);
 
@@ -213,12 +226,16 @@ namespace API.Services
             var oauthLogin = dataContext.OauthLogins.Where(l => l.LoginService == loginservice && l.OauthLoginId == id).Include(l => l.User).FirstOrDefault();
             if(oauthLogin == null) // no user made yet
             {
-                validatedClient.RequestUrl = loginSettings[loginservice].OAuth.MoreInfoUrl;
+                validatedClient.RequestUrl = loginSettings[loginservice].OAuth.MoreInfoUrl.ToString();
 
-                var url = validatedClient.RequestUrl + "?" + validatedClient.GetAuthorizationQuery();
+                var url = new Uri(validatedClient.RequestUrl + "?" + validatedClient.GetAuthorizationQuery());
                 var request = (HttpWebRequest)WebRequest.Create(url);
                 var response = (HttpWebResponse)request.GetResponse();
-                string info = new StreamReader(response.GetResponseStream()).ReadToEnd();
+                string info;
+                using (var s = new StreamReader(response.GetResponseStream()))
+                {
+                    info = s.ReadToEnd();
+                }
                 Console.WriteLine(info);
                 JsonElement infoJson = JsonSerializer.Deserialize<JsonElement>(info);
 
