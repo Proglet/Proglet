@@ -1,3 +1,17 @@
 ﻿@{
     Layout = "_Layout";
+
+
+    var jwtData = Context.Request.Cookies["jwt"];
+    ViewData["loggedIn"] = (jwtData != "" && jwtData != null);
+
+    if (jwtData != "" && jwtData != null)
+    {
+        var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+        var token = tokenHandler.ReadJwtToken(jwtData);
+        ViewData["token"] = token;
+        if (!token.Claims.Any(c => c.Type == "nameid"))
+            ViewData["loggedIn"] = false;
+    }
 }
+

@@ -25,6 +25,15 @@
             <div class="col">@Model.Course.CourseTemplate.MaterialUrl</div>
         </div>
     </li>
+    @if ((bool)ViewData["loggedIn"])
+    {
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col">Refresh course</div>
+                <div class="col"><input class="btn btn-primary" type="button" value="Refresh" onclick="refreshCourse()"/></div>
+            </div>
+        </li>
+    }
 </ul>
 
 <h2>Exercises</h2>
@@ -51,3 +60,18 @@
         </li>
     }
 </ul>
+
+
+
+<script>
+    function refreshCourse() {
+        $.post("/api/coursetemplates/refresh/@Model.Course.CourseTemplateId", { "jwt": Cookies.get("jwt") }, function (data) {
+            console.log(data);
+            alert("Refreshing: " + data);
+        });
+    }
+
+
+
+
+</script>

@@ -1,0 +1,15 @@
+﻿@model List<API.Models.LoginMethod>
+
+<h1>Please pick a login service</h1>
+<ul class="list-group">
+    @foreach (var login in Model)
+    {
+        <li class="list-group-item">
+            <a asp-controller="Login" asp-action="Start" asp-route-name="@login.Name">
+                <span class="badge-pill badge-primary float-right">@login.Type</span>
+                @login.Name
+            </a>
+        </li>
+
+    }
+</ul>

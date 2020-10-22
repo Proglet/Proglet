@@ -1,0 +1,17 @@
+﻿@model API.Models.Frontend.Login.Start
+
+<p>
+    Forwarding you to the proper oauth login.....
+
+    <script>
+        Cookies.set("jwt", '@Model.Jwt');
+
+        setTimeout(function () {
+            location.href = '@Model.Url';
+        }, 1000);
+    </script>
+</p>
+
+<p>
+    If you are not being forwarded automatically, click <a href="@Model.Url">here</a>
+</p>

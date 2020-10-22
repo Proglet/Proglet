@@ -45,7 +45,7 @@ namespace API.Services
         /// <param name="body"></param>
         /// <param name="request"></param>
         /// <returns></returns>
-        object HandleLogin(string loginservice, JsonElement body, HttpRequest request);
+        dynamic HandleLogin(string loginservice, JsonElement body, HttpRequest request);
 
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace API.Services
         /// </summary>
         /// <param name="finishData">Data needed to finish the oauth login sequence</param>
         /// <returns></returns>
-        object FinishOAuth(OauthFinishData finishData);
+        dynamic FinishOAuth(OauthFinishData finishData);
     }
 
 
@@ -81,7 +81,7 @@ namespace API.Services
             return loginSettings.Select(kv => new LoginMethod() { Name = kv.Key, Type = kv.Value.Type }).ToList();
         }
 
-        public object HandleLogin(string loginservice, JsonElement body, HttpRequest request)
+        public dynamic HandleLogin(string loginservice, JsonElement body, HttpRequest request)
         {
             if (!loginSettings.ContainsKey(loginservice))
                 return "Service not found";
@@ -96,7 +96,7 @@ namespace API.Services
                 return "Service type unknown";
         }
 
-        private object HandleLoginOauth(LoginInfo login, JsonElement body, HttpRequest clientRequest)
+        private dynamic HandleLoginOauth(LoginInfo login, JsonElement body, HttpRequest clientRequest)
         {
             var returnAddress = body.GetProperty("return").GetString();
 
@@ -142,7 +142,7 @@ namespace API.Services
 
 
 
-        public object FinishOAuth(OauthFinishData finishData)
+        public dynamic FinishOAuth(OauthFinishData finishData)
         {
             if (!loginSettings.ContainsKey(finishData.loginservice))
                 return "Service not found";
@@ -214,6 +214,7 @@ namespace API.Services
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secret)), SecurityAlgorithms.HmacSha256Signature)
             };
             var newToken = tokenHandler.CreateToken(tokenDescriptor);
+
 
             return new
             {
