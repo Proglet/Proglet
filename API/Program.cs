@@ -27,6 +27,12 @@ namespace API
         /// <returns></returns>
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config.AddJsonFile("/etc/proglet/proglet_api.json",
+                        optional: true,
+                        reloadOnChange: true);
+                }) //Configuration for server.
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
