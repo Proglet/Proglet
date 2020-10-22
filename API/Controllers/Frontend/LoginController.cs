@@ -76,9 +76,10 @@ namespace API.Controllers.Frontend
                 });
                 return View("Finish", finishData.jwt);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return View("Finish", "");
+                Console.WriteLine(e);
+                return View("Finish", e.ToString());
             }
 
         }
