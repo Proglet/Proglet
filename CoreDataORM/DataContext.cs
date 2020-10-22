@@ -35,6 +35,7 @@ namespace CoreDataORM
         public DbSet<OauthLogin> OauthLogins { get; set; }
         public DbSet<SlaveManager> SlaveManagers { get; set; }
 
+        public DbSet<DockerTestImage> DockerTestImages { get; set; }
         public DataContext(IOptions<Config> config)
         {
             if(config != null)
@@ -99,6 +100,7 @@ namespace CoreDataORM
                 entity.HasKey(e => e.ExerciseId);
                 entity.Property(e => e.Name).IsRequired();
                 entity.HasOne(d => d.CourseTemplate);
+                entity.HasOne(d => d.DockerTestImage);
             });
 
             modelBuilder.Entity<Submission>(entity =>
@@ -120,6 +122,7 @@ namespace CoreDataORM
             {
                 
             });
+
 
         }
     }

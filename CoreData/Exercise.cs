@@ -51,8 +51,7 @@ namespace Proglet.Core.Data
         public bool CodeReviewEnable { get; set; }
         public List<Point> Points { get; set; }
 
-
-
+        public DockerTestImage DockerTestImage { get; set; }
     }
 
 #nullable restore

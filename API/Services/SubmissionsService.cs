@@ -60,6 +60,7 @@ namespace API.Services
 
         public Submission Queue(int userId, ExerciseSubmission submission, string ip)
         {
+            //TODO: add course ID!!!!!!!!!!!!!!!!!
             using (var context = new DataContext(null))
             {
                 CourseRegistration cr = context.CourseRegistrations.Where(cr => cr.CourseId == submission.CourseId && cr.UserId == userId).Include(cr => cr.User).FirstOrDefault();
