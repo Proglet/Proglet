@@ -37,6 +37,7 @@ namespace API.ORM
         public DbSet<TestResult> TestResults { get; set; }
 
         public DbSet<Test> Tests { get; set; }
+        public DbSet<DockerTestImage> DockerTestImages { get; set; }
 
         public DataContext(IOptions<DatabaseConfig> config)
         {

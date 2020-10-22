@@ -52,9 +52,9 @@ namespace API.Controllers
                 using (var exercisesStream = archive.GetEntry("exercises.json").Open())
                 {
                     //TODO: remove/disable exercises that are in database but not in json file
-                    List<JsonCourseInfo> exercises = JsonSerializer.Deserialize<List<JsonCourseInfo>>(new StreamReader(exercisesStream).ReadToEnd());
+                    JsonCourseInfo course = JsonSerializer.Deserialize<JsonCourseInfo>(new StreamReader(exercisesStream).ReadToEnd());
 
-                    foreach (var exercise in exercises)
+                    foreach (var exercise in course.exercises)
                     {
                         Console.WriteLine($"Checking exercise {exercise.subject}/{exercise.name}");
                         var lastExercise = dbcontext.Exercises
@@ -80,6 +80,14 @@ namespace API.Controllers
                                 continue; // skip this exercise, doesn't have to be updated
                             }
                         }
+
+                        var testImage = dbcontext.DockerTestImages.FirstOrDefault(e => e.ImageName == course.properties.dockerimage);
+                        if(testImage == null)
+                        {
+                            testImage = new DockerTestImage();
+                            dbcontext.DockerTestImages.Add(testImage);
+                        }
+
                         var ex = new Exercise()
                         {
                             CourseTemplateId = id,
@@ -91,7 +99,8 @@ namespace API.Controllers
                             CreatedAt = DateTime.Now,
                             UpdatedAt = DateTime.Now,
                             PublishDate = DateTime.Now,
-                            SolutionVisableAfter = DateTime.Now
+                            SolutionVisableAfter = DateTime.Now,
+                            DockerTestImage = testImage
                         };
                         dbcontext.Exercises.Add(ex);
                         dbcontext.SaveChanges();
