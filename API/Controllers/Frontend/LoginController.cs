@@ -46,7 +46,7 @@ namespace API.Controllers.Frontend
                 case "OAuth":
                     var bodyData = new
                     {
-                        @return = "http://localhost:5000/Login/Finish/" + method.Name
+                        @return = $"{Request.Scheme}://{Request.Host}/Login/Finish/{method.Name}"
                     };
                     var res = loginService.HandleLogin(name, JsonDocument.Parse(JsonSerializer.Serialize(bodyData)).RootElement, Request);
                     return View(new Start()
