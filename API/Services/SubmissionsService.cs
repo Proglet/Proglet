@@ -71,45 +71,58 @@ namespace API.Services
 
                                 using (ZipArchive zipArchive = new ZipArchive(new MemoryStream(data)))
                                 {
-                                    //TODO: test if there's any other xml files?
-                                    var entry = zipArchive.GetEntry("TEST-Tests.xml");
-                                    using (var stream = entry.Open())
-                                    using (var streamreader = new StreamReader(stream))
+                                    foreach (var entry in zipArchive.Entries)
                                     {
-                                        string xmlData = streamreader.ReadToEnd();
-                                        XmlDocument document = new XmlDocument();
-                                        document.LoadXml(xmlData);
-                                        XmlNodeList cases = document.DocumentElement.GetElementsByTagName("testcase");
-                                        using (var dbContext = new DataContext(null))
+                                        if (!entry.FullName.EndsWith(".xml"))
+                                            continue;
+                                        using (var stream = entry.Open())
+                                        using (var streamreader = new StreamReader(stream))
                                         {
-                                            foreach (XmlNode @case in cases)
+                                            string xmlData = streamreader.ReadToEnd();
+                                            XmlDocument document = new XmlDocument();
+                                            document.LoadXml(xmlData);
+                                            XmlNodeList cases = document.DocumentElement.GetElementsByTagName("testcase");
+                                            using (var dbContext = new DataContext(null))
                                             {
-                                                var testName = @case.Attributes["name"].Value;
-                                                var className = @case.Attributes["classname"].Value;
-                                                double time = double.Parse(@case.Attributes["time"].Value);
-
-
-                                                Console.WriteLine($"Ran test {className}.{testName} in {time}s");
-
-
-                                                var test = dbContext.Tests.FirstOrDefault(t => t.ClassName == className && t.Name == testName);
-                                                dbContext.TestResults.Add(new TestResult()
+                                                foreach (XmlNode @case in cases)
                                                 {
-                                                    SubmissionId = s.SubmissionId,
-                                                    Message = "",
-                                                    Pass = true,
-                                                    StackTrace = "",
-                                                    Test = test
-                                                });
-                                            }
+                                                    var testName = @case.Attributes["name"].Value;
+                                                    var className = @case.Attributes["classname"].Value;
+                                                    double time = double.Parse(@case.Attributes["time"].Value);
+                                                    bool Pass = true;
+                                                    string StackTrace = "";
+                                                    string message = "";
 
-                                            var ss = dbContext.Submissions.FirstOrDefault(Submission => Submission.SubmissionId == s.SubmissionId);
-                                            ss.Status = Submission.SubmissionStatus.Processed;
-                                            dbContext.Submissions.Update(ss);
-                                            await dbContext.SaveChangesAsync();
+                                                    if(@case.ChildNodes.Count > 0)
+                                                    {
+                                                        string text = @case.FirstChild.InnerText;
+                                                        string[] splitted = text.Split("\n", 2);
+                                                        message = splitted[0];
+                                                        StackTrace = splitted[1];
+                                                    }
+
+
+                                                    Console.WriteLine($"Ran test {className}.{testName} in {time}s");
+
+
+                                                    var test = dbContext.Tests.FirstOrDefault(t => t.ClassName == className && t.Name == testName);
+                                                    dbContext.TestResults.Add(new TestResult()
+                                                    {
+                                                        SubmissionId = s.SubmissionId,
+                                                        Message = message,
+                                                        Pass = Pass,
+                                                        StackTrace = StackTrace,
+                                                        Test = test
+                                                    });
+                                                }
+
+                                                var ss = dbContext.Submissions.FirstOrDefault(Submission => Submission.SubmissionId == s.SubmissionId);
+                                                ss.Status = Submission.SubmissionStatus.Processed;
+                                                dbContext.Submissions.Update(ss);
+                                                await dbContext.SaveChangesAsync();
+                                            }
                                         }
                                     }
-
 
 
                                     
@@ -128,7 +141,6 @@ namespace API.Services
 
         public Submission Queue(int userId, ExerciseSubmission submission, string ip)
         {
-            //TODO: add course ID!!!!!!!!!!!!!!!!!
             using (var context = new DataContext(null))
             {
                 CourseRegistration cr = context.CourseRegistrations.Where(cr => cr.CourseId == submission.CourseId && cr.UserId == userId).Include(cr => cr.User).FirstOrDefault();
@@ -150,6 +162,8 @@ namespace API.Services
                     Submission s = new Submission()
                     {
                         User = cr.User,
+                        JobId = "",
+                        CourseId = cr.CourseId,
                         Exercise = exercise,
                         Status = Submission.SubmissionStatus.Unprocessed,
                         SubmissionIp = ip,

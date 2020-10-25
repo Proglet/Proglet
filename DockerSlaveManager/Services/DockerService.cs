@@ -156,6 +156,7 @@ namespace DockerSlaveManager.Services
                 Directory.CreateDirectory(localPathM);
                 var original = m.Value;
                 Console.WriteLine($"Downloading {original}");
+                //TODO: cache downloads
                 var httpResponse = await httpClient.GetAsync(original);
                 if (!httpResponse.IsSuccessStatusCode)
                 {

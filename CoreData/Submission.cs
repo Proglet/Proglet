@@ -19,6 +19,9 @@ namespace Proglet.Core.Data
         public int SubmissionId { get; set; }
 
         public User User { get; set; }
+        public int CourseId { get; set; }
+        [ForeignKey("CourseId")]
+        public Course Course { get; set; }
 
         public Exercise Exercise { get; set; }
 
