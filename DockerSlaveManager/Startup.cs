@@ -29,6 +29,7 @@ namespace DockerSlaveManager
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<Config>(Configuration.GetSection("Docker"));
+            services.AddHttpClient();
             services.AddControllers();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             services.AddSingleton<IHostedService, DockerService>();

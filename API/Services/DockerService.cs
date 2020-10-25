@@ -12,7 +12,7 @@ namespace API.Services
     public interface IDockerService
     {
         void RegisterSlaveManager(string url);
-        void RunContainer(string image, Dictionary<string, string> environment, Delegate callback);
+        void RunContainer(string image, Dictionary<string, string> environment = null, List<string> mounts = null, Delegate callback = null, string outDir = "/app/out");
         void Callback(string id, byte[] data, DataContext context);
     }
     public class DockerService : IDockerService
@@ -33,15 +33,32 @@ namespace API.Services
                 urls.Add(url);
         }
 
-        public async void RunContainer(string image, Dictionary<string, string> environment, Delegate callback)
-        {
+        public async void RunContainer(string image, Dictionary<string, string> environment, List<string> mounts, Delegate callback, string outDir)
+        { 
             var values = new Dictionary<string, string>
             {
                 { "Image", image },
                 { "CallbackUrl", dockerConfig.CallbackUrl + "/api/slaves/callback" },
-                { "Environment[test]", "test2" },
-                { "ZipOverlay", "" }
+                { "Arguments", "asd" }
             };
+
+            if (!string.IsNullOrEmpty(outDir))
+                values["OutPath"] = outDir;
+
+            if(environment != null)
+            {
+                foreach (var kv in environment)
+                    values[$"Environment[{kv.Key}]"] = kv.Value;
+            }
+
+            if (mounts != null)
+            {
+                foreach (string m in mounts)
+                {
+                    string[] mm = m.Split(":", 2);
+                    values[$"Mounts[{mm[0]}]"] = mm[1];
+                }
+            }
 
             using (var content = new FormUrlEncodedContent(values))
             {

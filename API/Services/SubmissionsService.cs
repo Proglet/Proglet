@@ -9,6 +9,10 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using API.Settings;
+using Microsoft.Extensions.Options;
+using System.IO.Compression;
+using System.Xml;
 
 namespace API.Services
 {
@@ -22,10 +26,12 @@ namespace API.Services
     {
         private EventWaitHandle waitHandle;
         private IDockerService dockerService;
+        private Docker dockerConfig;
 
-        public SubmissionsService(IDockerService dockerService)
+        public SubmissionsService(IDockerService dockerService, IOptions<Docker> config)
         {
             this.dockerService = dockerService;
+            this.dockerConfig = config.Value;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -35,21 +41,83 @@ namespace API.Services
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                waitHandle.WaitOne(TimeSpan.FromSeconds(60));
+                waitHandle.WaitOne(TimeSpan.FromSeconds(10));
 
                 using (var context = new DataContext(null))
                 {
                     context.Submissions
-                        .Where(s => !s.Processed)
+                        .Where(s => s.Status == Submission.SubmissionStatus.Unprocessed)
+                        .Include(s => s.Exercise)
+                            .ThenInclude(e => e.DockerTestImage)
+                        .Include(s => s.Exercise)
+                            .ThenInclude(e => e.CourseTemplate)
                         .ToList()
                         .ForEach(s =>
                         {
-                            /*dockerService.RunContainer("", new Dictionary<string, string>(), new Action<byte[]>((data) =>
+                            List<string> mounts = new List<string>()
+                            {
+                                "/tests:" + dockerConfig.CallbackUrl + "/api/coursetemplates/DownloadMainProject/" + s.Exercise.CourseTemplateId,
+                                "/usercode:" + dockerConfig.CallbackUrl + "/api/submissions/download/" + s.SubmissionId,
+                            };
+
+                            dockerService.RunContainer(
+                                image: s.Exercise.DockerTestImage.ImageName, 
+                                mounts: mounts, 
+                                outDir: "/out",
+                                environment: new Dictionary<string, string>() { { "TEST", $":{s.Exercise.Subject}-{s.Exercise.Name}:test" } },
+                                callback: new Action<byte[]>(async (data) =>
                             {
                                 Console.WriteLine("Done testing exercise!");
 
-                            }));*/
-                            s.Processed = true;
+                                using (ZipArchive zipArchive = new ZipArchive(new MemoryStream(data)))
+                                {
+                                    //TODO: test if there's any other xml files?
+                                    var entry = zipArchive.GetEntry("TEST-Tests.xml");
+                                    using (var stream = entry.Open())
+                                    using (var streamreader = new StreamReader(stream))
+                                    {
+                                        string xmlData = streamreader.ReadToEnd();
+                                        XmlDocument document = new XmlDocument();
+                                        document.LoadXml(xmlData);
+                                        XmlNodeList cases = document.DocumentElement.GetElementsByTagName("testcase");
+                                        using (var dbContext = new DataContext(null))
+                                        {
+                                            foreach (XmlNode @case in cases)
+                                            {
+                                                var testName = @case.Attributes["name"].Value;
+                                                var className = @case.Attributes["classname"].Value;
+                                                double time = double.Parse(@case.Attributes["time"].Value);
+
+
+                                                Console.WriteLine($"Ran test {className}.{testName} in {time}s");
+
+
+                                                var test = dbContext.Tests.FirstOrDefault(t => t.ClassName == className && t.Name == testName);
+                                                dbContext.TestResults.Add(new TestResult()
+                                                {
+                                                    SubmissionId = s.SubmissionId,
+                                                    Message = "",
+                                                    Pass = true,
+                                                    StackTrace = "",
+                                                    Test = test
+                                                });
+                                            }
+
+                                            var ss = dbContext.Submissions.FirstOrDefault(Submission => Submission.SubmissionId == s.SubmissionId);
+                                            ss.Status = Submission.SubmissionStatus.Processed;
+                                            dbContext.Submissions.Update(ss);
+                                            await dbContext.SaveChangesAsync();
+                                        }
+                                    }
+
+
+
+                                    
+
+                                }
+                            }));
+                            s.Status = Submission.SubmissionStatus.Processing;
+                            context.Submissions.Update(s);
                             Console.WriteLine($"Processing submission {s.SubmissionId}");
                         });
                     await context.SaveChangesAsync().ConfigureAwait(true);
@@ -77,21 +145,24 @@ namespace API.Services
                 if (exercise == null)
                     throw new Exception("Exercise not found");
 
-                Submission s = new Submission();
-                s.User = cr.User;
-                s.Exercise = exercise;
-                s.Processed = false;
-                s.SubmissionIp = ip;
-                s.SubmissionTime = DateTime.Now;
                 using (var br = new BinaryReader(submission.Data.OpenReadStream()))
                 {
-                    s.SubmissionZip = br.ReadBytes((int)submission.Data.Length);
-                }
+                    Submission s = new Submission()
+                    {
+                        User = cr.User,
+                        Exercise = exercise,
+                        Status = Submission.SubmissionStatus.Unprocessed,
+                        SubmissionIp = ip,
+                        SubmissionTime = DateTime.Now,
+                        SubmissionZip = br.ReadBytes((int)submission.Data.Length)
+                    };
 
-                context.Submissions.Add(s);
-                context.SaveChanges();
-                waitHandle.Set();
-                return s;
+                    context.Submissions.Add(s);
+                    context.SaveChanges();
+
+                    waitHandle.Set();
+                    return s; //TOOO, returning in an using sounds like a bad idea
+                }
             }
 
         }

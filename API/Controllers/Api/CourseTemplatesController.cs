@@ -37,7 +37,7 @@ namespace API.Controllers
         public ActionResult Refresh(int id)
         {
             CourseTemplate template = _context.CourseTemplates.Where(t => t.CourseTemplateId == id).First();
-            dockerService.RunContainer(template.DockerRefreshImage, null, new Action<byte[], DataContext>((data, dbcontext) =>
+            dockerService.RunContainer(template.DockerRefreshImage, null, null, new Action<byte[], DataContext>((data, dbcontext) =>
             { //in this callback, the _context is disposed already, so we use dbcontext
                 Console.WriteLine("Course Template refresh got a reply...");
                 //TODO: put this in background
@@ -84,7 +84,10 @@ namespace API.Controllers
                         var testImage = dbcontext.DockerTestImages.FirstOrDefault(e => e.ImageName == course.properties.dockerimage);
                         if(testImage == null)
                         {
-                            testImage = new DockerTestImage();
+                            testImage = new DockerTestImage()
+                            {
+                                ImageName = course.properties.dockerimage
+                            };
                             dbcontext.DockerTestImages.Add(testImage);
                         }
 
@@ -141,6 +144,24 @@ namespace API.Controllers
                 Console.WriteLine(data);
             }));
             return Ok("Ok");
+        }
+
+
+
+        /// <summary>
+        /// Downloads the main project file
+        /// </summary>
+        /// <param name="templateId">The template ID</param>
+        /// <returns></returns>
+        [HttpGet("DownloadMainProject/{templateId}")]
+        public ActionResult DownloadMainProject(int templateId)
+        {
+            string zipFileName = "data/templates/" + templateId + "/project.zip";
+            
+            var contentType = "Application/octet-stream";
+            var fileName = "Project.zip";
+            
+            return File(System.IO.File.ReadAllBytes(zipFileName), contentType, fileName);
         }
     }
 }

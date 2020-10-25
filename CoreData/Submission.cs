@@ -8,7 +8,13 @@ using System.Text;
 namespace Proglet.Core.Data
 {
     public class Submission
-    { 
+    {
+        public enum SubmissionStatus
+        {
+            Unprocessed,
+            Processing,
+            Processed
+        }
 
         public int SubmissionId { get; set; }
 
@@ -16,11 +22,11 @@ namespace Proglet.Core.Data
 
         public Exercise Exercise { get; set; }
 
-        /// <summary>
-        /// Indicates if the submission is processed
-        /// </summary>
-        [Column(TypeName = "bit")]
-        public bool Processed { get; set; }
+
+        [Column(TypeName = "enum(Unprocessed,Processing,Processed)")]
+        public SubmissionStatus Status { get; set; }
+        [Column(TypeName = "varchar(64)")]
+        public string JobId { get; set; }
 
         // some fields with results
         public List<TestResult> TestResults { get; set; }

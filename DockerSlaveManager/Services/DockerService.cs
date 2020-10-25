@@ -29,7 +29,7 @@ namespace DockerSlaveManager.Services
         private ILogger logger;
 
         private Dictionary<string, QueueItem> queueStatus;
-
+        private HttpClient httpClient;
 
         public DockerService(IOptions<Config> config, IBackgroundTaskQueue taskQueue, ILoggerFactory loggerFactory)
         {
@@ -37,6 +37,7 @@ namespace DockerSlaveManager.Services
             this.TaskQueue = taskQueue;
             this.logger = loggerFactory.CreateLogger<DockerService>();
             this.queueStatus = new Dictionary<string, QueueItem>();
+            this.httpClient = new HttpClient();
         }
 
         public IEnumerable<QueueItem> Queue()
@@ -115,12 +116,18 @@ namespace DockerSlaveManager.Services
             });
                        
             var localPath = Path.Combine(config.SharedMountLocal, id.ToString());
-            var srcPath = Path.Combine(config.SharedMount, id.ToString());
+            var srcPath = config.SharedMount + "/" + id.ToString();
             Directory.CreateDirectory(localPath);
-            var response = await client.Containers.CreateContainerAsync(new CreateContainerParameters()
+
+            var localPathOut = Path.Combine(localPath, "out");
+            var srcPathOut = srcPath + "/out";
+            Directory.CreateDirectory(localPathOut);
+
+            var createParams = new CreateContainerParameters()
             {
                 Image = imageList[0].ID,
                 Name = runConfig.Image.Replace("/", "_") + "_" + id,
+                
                 HostConfig = new HostConfig()
                 {
                     Mounts = new List<Mount>()
@@ -128,12 +135,64 @@ namespace DockerSlaveManager.Services
                         new Mount()
                         {
                             Type = "bind",
-                            Source = srcPath,
-                            Target = "/app/out"
+                            Source = srcPathOut,
+                            Target = runConfig.OutPath
+                        }
+                    },
+                },
+            };
+
+            if(runConfig.Environment != null && runConfig.Environment.Count > 0)
+            {
+                createParams.Env = runConfig.Environment.Select(kv => $"{kv.Key}={kv.Value}").ToList();
+            }
+
+
+            foreach(var m in runConfig.Mounts)
+            {
+                string randomName = Guid.NewGuid().ToString("n").Substring(0, 16);
+                var localPathM = Path.Combine(localPath, randomName);
+                var srcPathM = srcPath + "/" + randomName;
+                Directory.CreateDirectory(localPathM);
+                var original = m.Value;
+                Console.WriteLine($"Downloading {original}");
+                var httpResponse = await httpClient.GetAsync(original);
+                if (!httpResponse.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Could not download {original}");
+                    continue;
+                }
+                byte[] data = await httpResponse.Content.ReadAsByteArrayAsync();
+                MemoryStream ms = new MemoryStream(data);
+                Console.WriteLine($"unzipping {original}");
+                using (var zipFile = new ZipArchive(ms))
+                {
+                    foreach (var entry in zipFile.Entries)
+                    {
+                        if (entry.FullName.Contains("..")) //TODO: bad zip prevention, improve
+                            continue;
+                        if (entry.FullName.EndsWith("/"))
+                            Directory.CreateDirectory(Path.Combine(localPathM, entry.FullName));
+                        else
+                        {
+                            Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(localPathM, entry.FullName)));
+                            entry.ExtractToFile(Path.Combine(localPathM, entry.FullName));
                         }
                     }
-                },
-            });
+                }
+
+                createParams.HostConfig.Mounts.Add(new Mount()
+                {
+                    Type = "bind",
+                    Source = srcPathM,
+                    Target = m.Key
+                });
+            }
+            
+
+            var response = await client.Containers.CreateContainerAsync(createParams);
+
+
             Console.WriteLine($"Created container {response.ID}");
 
 
@@ -163,9 +222,7 @@ namespace DockerSlaveManager.Services
                     await archive.WriteStringToFileAsync("stdout.txt", queueStatus[id.ToString()].stdout);
                     await archive.WriteStringToFileAsync("stderr.txt", queueStatus[id.ToString()].stderr);
 
-                    //TODO: recursive
-                    string[] files = Directory.GetFiles(localPath);
-                    foreach (var filePath in files)
+                    foreach (var filePath in Directory.EnumerateFiles(localPathOut, "*.*", SearchOption.AllDirectories))
                     {
                         string fileName = Path.GetFileName(filePath);
                         var entry = archive.CreateEntryFromFile(filePath, fileName);

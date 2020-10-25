@@ -12,5 +12,8 @@ namespace DockerSlaveManager.Models.Multipart
         public Dictionary<string, string> Environment { get; set; }
         public string CallbackUrl { get; set; }
         public IFormFile ZipOverlay { get; set; }
+        public Dictionary<string, string> Mounts { get; set; }
+
+        public string OutPath { get; set; } = "/app/out";
     }
 }
