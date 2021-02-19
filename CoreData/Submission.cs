@@ -7,14 +7,16 @@ using System.Text;
 
 namespace Proglet.Core.Data
 {
+    public enum SubmissionStatus
+    {
+        Unprocessed,
+        Processing,
+        Processed
+    }
+
     public class Submission
     {
-        public enum SubmissionStatus
-        {
-            Unprocessed,
-            Processing,
-            Processed
-        }
+
 
         public int SubmissionId { get; set; }
 
@@ -26,7 +28,7 @@ namespace Proglet.Core.Data
         public Exercise Exercise { get; set; }
 
 
-        [Column(TypeName = "enum(Unprocessed,Processing,Processed)")]
+        [Column(TypeName = "enum('Unprocessed','Processing','Processed')")]
         public SubmissionStatus Status { get; set; }
         [Column(TypeName = "varchar(64)")]
         public string JobId { get; set; }

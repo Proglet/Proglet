@@ -46,7 +46,7 @@ namespace API.Services
                 using (var context = new DataContext(null))
                 {
                     context.Submissions
-                        .Where(s => s.Status == Submission.SubmissionStatus.Unprocessed)
+                        .Where(s => s.Status == SubmissionStatus.Unprocessed)
                         .Include(s => s.Exercise)
                             .ThenInclude(e => e.DockerTestImage)
                         .Include(s => s.Exercise)
@@ -167,7 +167,7 @@ namespace API.Services
                         JobId = "",
                         CourseId = cr.CourseId,
                         Exercise = exercise,
-                        Status = Submission.SubmissionStatus.Unprocessed,
+                        Status = SubmissionStatus.Unprocessed,
                         SubmissionIp = ip,
                         SubmissionTime = DateTime.Now,
                         SubmissionZip = br.ReadBytes((int)submission.Data.Length)
