@@ -119,7 +119,7 @@ namespace API.Services
                                                 }
 
                                                 var ss = dbContext.Submissions.FirstOrDefault(Submission => Submission.SubmissionId == s.SubmissionId);
-                                                ss.Status = Submission.SubmissionStatus.Processed;
+                                                ss.Status = SubmissionStatus.Processed;
                                                 dbContext.Submissions.Update(ss);
                                                 await dbContext.SaveChangesAsync();
                                             }
@@ -131,7 +131,7 @@ namespace API.Services
 
                                 }
                             }));
-                            s.Status = Submission.SubmissionStatus.Processing;
+                            s.Status = SubmissionStatus.Processing;
                             context.Submissions.Update(s);
                             Console.WriteLine($"Processing submission {s.SubmissionId}");
                         });
