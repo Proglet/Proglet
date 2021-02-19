@@ -59,7 +59,7 @@ namespace API.ORM
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySql(config.configstring);
+            optionsBuilder.UseMySql(config.configstring, ServerVersion.AutoDetect(config.configstring), options => options.EnableRetryOnFailure());
             optionsBuilder.UseLoggerFactory(GetLoggerFactory());
 
         }

@@ -201,7 +201,7 @@ namespace DockerSlaveManager.Services
             await client.Containers.StartContainerAsync(response.ID, new ContainerStartParameters());
             Console.WriteLine($"Waiting for container {response.ID} to finish running");
 
-            CancellationToken token;
+            CancellationToken token = CancellationToken.None;
             var stream = await client.Containers.AttachContainerAsync(response.ID, true, new ContainerAttachParameters() { Stdout = true, Stream = true });
             (string stdout, string stderr) p = await stream.ReadOutputToEndAsync(token);
 
