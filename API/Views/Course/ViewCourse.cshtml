@@ -67,9 +67,9 @@
     @foreach(var submission in Model.Course.Submissions.OrderByDescending(s => s.SubmissionTime).Take(20))
     {
         var classes = "";
-        if (submission.Status == Proglet.Core.Data.Submission.SubmissionStatus.Processing)
+        if (submission.Status == Proglet.Core.Data.SubmissionStatus.Processing)
             classes = "bg-info";
-        else if(submission.Status == Proglet.Core.Data.Submission.SubmissionStatus.Processed)
+        else if(submission.Status == Proglet.Core.Data.SubmissionStatus.Processed)
         {
             if (submission.TestResults.All(tr => tr.Pass))
                 classes = "bg-success";
