@@ -66,8 +66,19 @@
 <ul class="list-group">
     @foreach(var submission in Model.Course.Submissions.OrderByDescending(s => s.SubmissionTime).Take(20))
     {
-    <li class="list-group-item">
-        <a asp-controller="Submission" asp-action="@submission.SubmissionId">
+        var classes = "";
+        if (submission.Status == Proglet.Core.Data.Submission.SubmissionStatus.Processing)
+            classes = "bg-info";
+        else if(submission.Status == Proglet.Core.Data.Submission.SubmissionStatus.Processed)
+        {
+            if (submission.TestResults.All(tr => tr.Pass))
+                classes = "bg-success";
+            else
+                classes = "bg-danger";
+        }
+
+    <li class="list-group-item @classes">
+        <a asp-controller="Submission" asp-action="@submission.SubmissionId" class="text-white">
             <div class="row">
                 <div class="col">@submission.SubmissionTime</div>
                 <div class="col">@submission.User.Username</div>

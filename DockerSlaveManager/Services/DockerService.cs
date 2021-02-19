@@ -147,7 +147,6 @@ namespace DockerSlaveManager.Services
                 createParams.Env = runConfig.Environment.Select(kv => $"{kv.Key}={kv.Value}").ToList();
             }
 
-
             foreach(var m in runConfig.Mounts)
             {
                 string randomName = Guid.NewGuid().ToString("n").Substring(0, 16);

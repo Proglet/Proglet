@@ -95,6 +95,8 @@ namespace API.Services
 
                                                     if(@case.ChildNodes.Count > 0)
                                                     {
+                                                        if (@case.FirstChild.Name == "failure")
+                                                            Pass = false;
                                                         string text = @case.FirstChild.InnerText;
                                                         string[] splitted = text.Split("\n", 2);
                                                         message = splitted[0];
