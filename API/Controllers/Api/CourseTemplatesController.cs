@@ -52,7 +52,7 @@ namespace API.Controllers
                 using (var exercisesStream = archive.GetEntry("exercises.json").Open())
                 {
                     //TODO: remove/disable exercises that are in database but not in json file
-                    JsonCourseInfo course = JsonSerializer.Deserialize<JsonCourseInfo>(new StreamReader(exercisesStream).ReadToEnd());
+                    JsonCourseInfo course = JsonSerializer.Deserialize<JsonCourseInfo>(new StreamReader(exercisesStream).ReadToEnd().Trim());
 
                     foreach (var exercise in course.exercises)
                     {

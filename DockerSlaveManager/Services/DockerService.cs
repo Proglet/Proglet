@@ -114,7 +114,21 @@ namespace DockerSlaveManager.Services
                 All = true,
                 MatchName = runConfig.Image
             });
-                       
+
+            var image = imageList.Where(img => img.RepoTags != null && img.RepoTags.Contains(runConfig.Image + ":latest")).FirstOrDefault();
+            if(image == null)
+            {
+                Console.WriteLine("Error finding image: ");
+                foreach (var img in imageList)
+                {
+                    Console.WriteLine("Id: " + img.ID);
+                    if (img.RepoTags != null)
+                        Console.WriteLine("Tags: " + string.Join(',', img.RepoTags));
+                    else
+                        Console.WriteLine("Tags: null");
+                }
+            }
+
             var localPath = Path.Combine(config.SharedMountLocal, id.ToString());
             var srcPath = config.SharedMount + "/" + id.ToString();
             Directory.CreateDirectory(localPath);
@@ -125,7 +139,7 @@ namespace DockerSlaveManager.Services
 
             var createParams = new CreateContainerParameters()
             {
-                Image = imageList[0].ID,
+                Image = image.ID,
                 Name = runConfig.Image.Replace("/", "_") + "_" + id,
                 
                 HostConfig = new HostConfig()
