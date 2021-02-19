@@ -38,7 +38,14 @@ namespace API.Controllers
         {
             return View(new CourseModel()
             {
-                Course = context.Courses.Where(c => c.CourseTemplateId == id).Include(c => c.CourseTemplate).First(),
+                Course = context.Courses
+                    .Where(c => c.CourseTemplateId == id)
+                    .Include(c => c.CourseTemplate)
+                    .Include(c => c.Submissions)
+                        .ThenInclude(s => s.User)
+                    .Include(c => c.Submissions)
+                        .ThenInclude(s => s.TestResults)
+                    .First(),
                 Exercises = context.Exercises.Where(e => e.CourseTemplateId == id).ToList(),
                 Enrolled = context.Users.Where(u => u.CourseRegistrations.Any(cr => cr.User == u && cr.Active)).ToList()
             });

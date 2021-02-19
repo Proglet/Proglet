@@ -62,6 +62,24 @@
 </ul>
 
 
+<h2>Submissions</h2>
+<ul class="list-group">
+    @foreach(var submission in Model.Course.Submissions.OrderByDescending(s => s.SubmissionTime).Take(20))
+    {
+    <li class="list-group-item">
+        <a asp-controller="Submission" asp-action="@submission.SubmissionId">
+            <div class="row">
+                <div class="col">@submission.SubmissionTime</div>
+                <div class="col">@submission.User.Username</div>
+                <div class="col">@submission.Status</div>
+                <div class="col">@(submission.TestResults.Count == 0 ? "" : (submission.TestResults.All(tr => tr.Pass) ? "Tests Ok" : "Tests have errors"))</div>
+            </div>
+        </a>
+
+    </li>
+    }
+</ul>
+
 
 <script>
     function refreshCourse() {

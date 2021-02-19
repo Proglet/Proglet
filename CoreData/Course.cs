@@ -27,5 +27,7 @@ namespace Proglet.Core.Data
         public DateTime HidderAfter { get; set; }
 
         public ICollection<CourseRegistration> Users { get; set; }
+
+        public ICollection<Submission> Submissions { get; set; }
     }
 }

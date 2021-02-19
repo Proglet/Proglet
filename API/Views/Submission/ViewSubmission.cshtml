@@ -1,0 +1,60 @@
+﻿@model Proglet.Core.Data.Submission
+@{
+    ViewData["Title"] = "ViewSubmission";
+}
+
+<h1>Submission</h1>
+
+<ul class="list-group">
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col">Id</div>
+            <div class="col">@Model.SubmissionId</div>
+        </div>
+    </li>
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col">Time</div>
+            <div class="col">@Model.SubmissionTime</div>
+        </div>
+    </li>
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col">User</div>
+            <div class="col">@Model.User.Username</div>
+        </div>
+    </li>
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col">Status</div>
+            <div class="col">@Model.Status</div>
+        </div>
+    </li>
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col">Exercise</div>
+            <div class="col">@Model.Exercise.Name</div>
+        </div>
+    </li>
+</ul>
+
+<h2>Test results</h2>
+<ul class="list-group">
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col">Test</div>
+            <div class="col">Message</div>
+            <div class="col">Points</div>
+        </div>
+    </li>
+    @foreach (var result in Model.TestResults)
+    {
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col">@result.Test.ClassName . @result.Test.Name</div>
+                <div class="col">@result.Message</div>
+                <div class="col">@(result.Pass ? result.Test.Point.Name : "")</div>
+            </div>
+        </li>
+    }
+</ul>
